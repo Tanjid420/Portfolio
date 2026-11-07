@@ -1,4 +1,5 @@
 import { cv, cvPdfUrl } from '../data/cv'
+import { useSoundSettings } from '../soundSettings'
 import type { Route } from '../useRoute'
 
 // Always visible, on every screen, so recruiters can reach the CV in one click.
@@ -14,7 +15,9 @@ export function TopBar({ route }: { route: Route }) {
           <a className="btn btn-ghost" href="#/">
             Play<span className="hide-sm"> the game</span>
           </a>
-        ) : null}
+        ) : (
+          <MuteButton />
+        )}
         <a
           className="btn btn-ghost"
           href="#/cv"
@@ -28,5 +31,28 @@ export function TopBar({ route }: { route: Route }) {
         </a>
       </nav>
     </header>
+  )
+}
+
+// Only on the game screen. M toggles it too.
+function MuteButton() {
+  const muted = useSoundSettings((s) => s.muted)
+  const toggle = useSoundSettings((s) => s.toggleMuted)
+  return (
+    <button
+      type="button"
+      className="btn btn-ghost btn-icon"
+      // Drop focus after the click, or the next Space press (net swing) would toggle sound again.
+      onClick={(e) => {
+        toggle()
+        e.currentTarget.blur()
+      }}
+      aria-pressed={muted}
+      aria-label={muted ? 'Turn sound on (M)' : 'Mute sound (M)'}
+      title={muted ? 'Turn sound on (M)' : 'Mute sound (M)'}
+      data-testid="mute"
+    >
+      {muted ? '🔇' : '🔊'}
+    </button>
   )
 }

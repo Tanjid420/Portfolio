@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { reportById } from './reports'
 import { CARD_SHOW_DELAY_MS, useGame } from './store'
 import { BUGS } from './bugs'
+import { sfx } from './sound'
 
 /** After showing, the card ignores closing for a moment, so a player mashing Space doesn't skip it unread. */
 const READY_AFTER_MS = CARD_SHOW_DELAY_MS + 500
@@ -38,6 +39,11 @@ export function BugReportCard() {
       clearTimeout(focus)
     }
   }, [id, openedAt])
+
+  // Paper "ticket" sound each time a card appears, including the next one in the queue.
+  useEffect(() => {
+    if (shown) sfx.card()
+  }, [shown, id])
 
   useEffect(() => {
     if (!id) return

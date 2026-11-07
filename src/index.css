@@ -38,6 +38,7 @@ a { color: var(--accent); }
 .btn-primary:hover { filter: brightness(1.1); }
 .btn-ghost { color: var(--text); background: transparent; border-color: var(--line); }
 .btn-ghost:hover, .btn-ghost[aria-current='page'] { border-color: var(--accent); color: var(--accent); }
+.btn-icon { cursor: pointer; font-family: inherit; min-width: 40px; text-align: center; }
 .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 
 /* Top bar: fixed, always visible */

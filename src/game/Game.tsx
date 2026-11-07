@@ -7,10 +7,12 @@ import { HiddenBugs } from './HiddenBugs'
 import { CoverageBar, Minimap } from './Hud'
 import { Island } from './Island'
 import { Player } from './Player'
+import { useGameAudio } from './sound'
 
 const BG = '#0F1712'
 
 export default function Game() {
+  useGameAudio()
   return (
     <>
       <Canvas
