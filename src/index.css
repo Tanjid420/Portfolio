@@ -124,3 +124,117 @@ a { color: var(--accent); }
   .cv-job-meta { text-align: left; }
 }
 .cv-foot { margin-top: 40px !important; }
+
+/* HUD: coverage bar (top left) and minimap (top right), over the game */
+.hud-coverage {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  padding: 8px 12px 10px;
+  background: rgba(15, 23, 18, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  pointer-events: none;
+  max-width: calc(100% - 140px);
+}
+.hud-coverage strong { color: var(--accent); }
+.hud-coverage-bar {
+  margin-top: 6px;
+  height: 6px;
+  min-width: 180px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hud-coverage-bar > div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.hud-minimap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+}
+.map-sea { fill: #1d5f6b; }
+.map-land { fill: #3A7550; stroke: #E3D3A8; stroke-width: 1.2; }
+.map-mountain { fill: #6B7A72; }
+.map-zone circle { fill: rgba(15, 23, 18, 0.55); stroke-width: 1; }
+.map-zone text { font-size: 6px; font-weight: 700; text-anchor: middle; font-family: system-ui, sans-serif; }
+.map-zone-open circle { stroke: #FF7452; }
+.map-zone-open text { fill: #FF7452; }
+.map-zone-clear circle { stroke: var(--accent); fill: rgba(93, 187, 140, 0.35); }
+.map-zone-clear text { fill: var(--text); }
+.map-zone-info circle { stroke: var(--muted); }
+.map-hero path { fill: #fff; stroke: var(--bg); stroke-width: 0.8; }
+
+@media (max-width: 560px) {
+  .hud-coverage { font-size: 12px; padding: 6px 10px 8px; }
+  .hud-coverage-bar { min-width: 0; }
+  .hud-minimap { width: 92px; height: 92px; }
+}
+
+/* Bug report card: Jira-style ticket */
+.report-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 18, 0.55);
+  animation: fade-in 0.3s 0.35s both;
+}
+.report {
+  width: min(520px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 20px 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid #FF7452;
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  animation: card-in 0.35s 0.35s both cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+.report-boss { border-top-color: #D9452B; }
+.report-golden { border-color: rgba(242, 193, 78, 0.5); border-top-color: #F2C14E; box-shadow: 0 0 40px rgba(242, 193, 78, 0.25), 0 18px 50px rgba(0, 0, 0, 0.5); }
+.report-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+.report-id { font-family: ui-monospace, monospace; color: var(--muted); font-weight: 600; }
+.pill { padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.pill-critical { background: #D9452B; color: #fff; }
+.pill-major { background: #F2C14E; color: #2a2006; }
+.pill-minor { background: #FF7452; color: #2a0e06; }
+.pill-resolved { background: rgba(93, 187, 140, 0.18); color: var(--accent); border: 1px solid var(--accent); }
+.report-star { margin-left: auto; color: #F2C14E; font-weight: 700; }
+.report-headline { margin: 14px 0 0; font-size: 26px; font-weight: 800; line-height: 1.2; color: #F2C14E; }
+.report-title { margin: 10px 0 14px; font-size: 20px; line-height: 1.3; }
+.report-headline + .report-title { margin-top: 4px; font-size: 16px; color: var(--muted); }
+.report-rows { margin: 0; display: grid; gap: 10px; font-size: 14px; }
+.report-rows div { display: grid; grid-template-columns: 140px 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.report-rows dt { font-weight: 600; color: var(--muted); }
+.report-rows dd { margin: 0; }
+.report-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; font-size: 13px; }
+.report-foot .btn { cursor: pointer; font-family: inherit; }
+.report-foot .btn:disabled { opacity: 0.6; cursor: default; }
+@media (max-width: 560px) {
+  .report { padding: 16px; }
+  .report-rows div { grid-template-columns: 1fr; gap: 2px; }
+  .report-headline { font-size: 22px; }
+}
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes card-in { from { opacity: 0; transform: translateY(16px) scale(0.92); } }
+@media (prefers-reduced-motion: reduce) {
+  .report, .report-backdrop { animation-duration: 0.01s; }
+}

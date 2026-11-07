@@ -249,10 +249,13 @@ export function Player() {
     const m = motion.current
     const keys = held.current
     const state = useGame.getState()
+    // The hero waits while a bug report is open.
+    const paused = state.cardQueue.length > 0
+    if (paused) swingRequested.current = false
 
     // Movement: screen up is -z because the camera looks north.
-    let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
-    let dz = (keys.down ? 1 : 0) - (keys.up ? 1 : 0)
+    let dx = paused ? 0 : (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+    let dz = paused ? 0 : (keys.down ? 1 : 0) - (keys.up ? 1 : 0)
     const len = Math.hypot(dx, dz)
     let moved = 0
     if (len > 0) {
