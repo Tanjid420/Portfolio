@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { TopBar } from './components/TopBar'
 import { CvPage } from './components/CvPage'
 import { GameErrorBoundary, GameFallback } from './components/GameFallback'
+import { GameLoading } from './components/GameLoading'
 import { hasWebGL } from './game/device'
 import { useRoute } from './useRoute'
 
@@ -21,7 +22,7 @@ export default function App() {
       ) : (
         <GameErrorBoundary>
           <div className="game" data-testid="game">
-            <Suspense fallback={<p className="game-loading">Loading the island… herding the bugs into place</p>}>
+            <Suspense fallback={<GameLoading />}>
               <Game />
             </Suspense>
           </div>

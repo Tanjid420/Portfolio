@@ -58,7 +58,7 @@ export interface Building {
 
 // One building per zone, placed behind or beside it so the camera can still see the zone.
 const BUILDING_SPOTS: [ZoneId, number, number][] = [
-  ['office', -27, 5],
+  ['office', -25, 1.5],
   ['workshop', -11, -22.5],
   ['testlab', 13, -22.5],
   ['academy', 28, 4],

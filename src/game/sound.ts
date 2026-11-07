@@ -94,6 +94,143 @@ function hiss(at: number, dur: number, from: number, to: number, vol: number, ou
   src.stop(at + dur + 0.02)
 }
 
+interface VoiceOptions {
+  /** Pitch over time, as [fraction of the duration, Hz]. */
+  pitch: [number, number][]
+  /** Vowel shape: each formant filter's centre frequency from start to end, in Hz. */
+  formants: [number, number][]
+  /** Wobble speed (Hz) and how deep it gets, from start to end (Hz). */
+  vibrato: number
+  vibratoDepth: [number, number]
+  /** Optional fast volume flutter, [speed in Hz, depth 0..1]: makes an "a-a-a-ah" warble. */
+  tremolo?: [number, number]
+  vol: number
+}
+
+/**
+ * A cartoon voice: a buzzy tone shaped by vowel filters, with a wobble in the pitch.
+ * Moving the filters changes the vowel, e.g. "ah" into "oo".
+ */
+function voice(at: number, dur: number, o: VoiceOptions) {
+  const c = ctx!
+  const osc = c.createOscillator()
+  osc.type = 'sawtooth'
+  osc.frequency.setValueAtTime(o.pitch[0][1], at)
+  for (const [f, hz] of o.pitch.slice(1)) osc.frequency.linearRampToValueAtTime(hz, at + f * dur)
+
+  const lfo = c.createOscillator()
+  lfo.frequency.value = o.vibrato
+  const depth = c.createGain()
+  depth.gain.setValueAtTime(o.vibratoDepth[0], at)
+  depth.gain.linearRampToValueAtTime(o.vibratoDepth[1], at + dur)
+  lfo.connect(depth).connect(osc.frequency)
+
+  const env = c.createGain()
+  env.gain.setValueAtTime(0, at)
+  env.gain.linearRampToValueAtTime(o.vol, at + 0.03)
+  env.gain.setValueAtTime(o.vol, at + dur * 0.7)
+  env.gain.exponentialRampToValueAtTime(0.0001, at + dur)
+  let out: AudioNode = env
+  if (o.tremolo) {
+    const [rate, amount] = o.tremolo
+    const flutter = c.createGain()
+    flutter.gain.value = 1 - amount / 2
+    const trem = c.createOscillator()
+    trem.frequency.value = rate
+    const tremDepth = c.createGain()
+    tremDepth.gain.value = amount / 2
+    trem.connect(tremDepth).connect(flutter.gain)
+    env.connect(flutter)
+    out = flutter
+    trem.start(at)
+    trem.stop(at + dur + 0.05)
+  }
+  out.connect(sfxOut)
+
+  for (const [from, to] of o.formants) {
+    const f = c.createBiquadFilter()
+    f.type = 'bandpass'
+    f.Q.value = 6
+    f.frequency.setValueAtTime(from, at)
+    f.frequency.linearRampToValueAtTime(to, at + dur)
+    osc.connect(f).connect(env)
+  }
+  // A little of the raw tone keeps it bright.
+  const dry = c.createGain()
+  dry.gain.value = 0.12
+  osc.connect(dry).connect(env)
+
+  osc.start(at)
+  lfo.start(at)
+  osc.stop(at + dur + 0.05)
+  lfo.stop(at + dur + 0.05)
+}
+
+/** Small bugs: a panicked "ip-ip-ip!", a warbly "EEEE-ooww!", and a little "boing". A bit different every time. */
+function squeak(at: number) {
+  const k = 0.85 + Math.random() * 0.3
+  ;[0, 0.075, 0.15].forEach((d, i) =>
+    voice(at + d, 0.06, {
+      pitch: [
+        [0, (1100 + i * 150) * k],
+        [1, (1500 + i * 180) * k],
+      ],
+      formants: [[2500, 2700]],
+      vibrato: 1,
+      vibratoDepth: [0, 0],
+      vol: 0.22,
+    }),
+  )
+  voice(at + 0.24, 0.55, {
+    pitch: [
+      [0, 1300 * k],
+      [0.25, 2000 * k],
+      [0.7, 1650 * k],
+      [1, 480 * k],
+    ],
+    // "ee" sliding into "ow".
+    formants: [
+      [2600, 900],
+      [3400, 1300],
+    ],
+    vibrato: 14,
+    vibratoDepth: [30, 120],
+    tremolo: [24, 0.8],
+    vol: 0.25,
+  })
+  tone(760 * k, at + 0.8, 0.28, { type: 'sine', slideTo: 260 * k, vol: 0.09 })
+  tone(1520 * k, at + 0.8, 0.12, { type: 'sine', slideTo: 520 * k, vol: 0.03 })
+}
+
+/** Sad trombone: "wah-wah-wah-waaaah". Each note opens from "w" to "ah"; the last one sags and wobbles. */
+function sadTrombone(at: number) {
+  const notes: [number, number][] = [
+    [62, 0.32],
+    [61, 0.32],
+    [60, 0.32],
+    [59, 1.1],
+  ]
+  let t = at
+  notes.forEach(([m, dur], i) => {
+    const last = i === notes.length - 1
+    voice(t, dur, {
+      pitch: [
+        [0, freq(m) * 0.97],
+        [0.15, freq(m)],
+        [1, freq(m) * (last ? 0.94 : 0.99)],
+      ],
+      formants: [
+        [380, last ? 600 : 1100],
+        [800, last ? 1100 : 1500],
+      ],
+      vibrato: 6,
+      vibratoDepth: last ? [2, 18] : [1, 3],
+      vol: 0.3,
+    })
+    t += dur + 0.02
+  })
+}
+
 /** Plays a sound effect now, if sound is on. */
 function play(fn: (now: number) => void) {
   if (audible()) fn(ctx!.currentTime)
@@ -104,21 +241,25 @@ export const sfx = {
   catch: (kind: BugKind) =>
     play((t) => {
       if (kind === 'golden') {
-        // Rising sparkle arpeggio, the "big catch" moment.
-        ;[72, 76, 79, 84, 88].forEach((m, i) => tone(freq(m), t + i * 0.06, 0.35, { vol: 0.22 }))
-        ;[96, 100, 103].forEach((m, i) => tone(freq(m), t + 0.3 + i * 0.05, 0.4, { type: 'sine', vol: 0.08 }))
+        // Squeak, then a rising sparkle arpeggio, the "big catch" moment.
+        squeak(t)
+        ;[72, 76, 79, 84, 88].forEach((m, i) => tone(freq(m), t + 1.0 + i * 0.06, 0.35, { vol: 0.16 }))
+        ;[96, 100, 103].forEach((m, i) => tone(freq(m), t + 1.3 + i * 0.05, 0.4, { type: 'sine', vol: 0.07 }))
       } else if (kind === 'boss') {
-        // Heavy thud, then a little victory chord.
-        tone(140, t, 0.35, { type: 'sawtooth', slideTo: 50, vol: 0.25 })
-        ;[60, 64, 67, 72].forEach((m) => tone(freq(m), t + 0.25, 0.6, { vol: 0.12, attack: 0.03 }))
+        // Heavy thud, then a sad trombone: "wah-wah-wah-waaaah".
+        tone(140, t, 0.35, { type: 'sawtooth', slideTo: 50, vol: 0.2 })
+        sadTrombone(t + 0.3)
       } else {
-        // Cute "bloop".
-        tone(520, t, 0.1, { type: 'square', slideTo: 900, vol: 0.12 })
-        tone(freq(84), t + 0.09, 0.18, { vol: 0.2 })
+        // Squeak, then a cute "bloop".
+        squeak(t)
+        tone(freq(84), t + 1.05, 0.18, { vol: 0.12 })
       }
     }),
   hidden: () =>
-    play((t) => [88, 91, 96, 91, 100].forEach((m, i) => tone(freq(m), t + i * 0.05, 0.3, { type: 'sine', vol: 0.1 }))),
+    play((t) => {
+      squeak(t)
+      ;[88, 91, 96, 91, 100].forEach((m, i) => tone(freq(m), t + 1.0 + i * 0.05, 0.3, { type: 'sine', vol: 0.08 }))
+    }),
   pickup: () =>
     play((t) => {
       tone(freq(79), t, 0.2, { type: 'sine', vol: 0.25 })

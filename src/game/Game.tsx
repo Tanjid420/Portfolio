@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerformanceMonitor } from '@react-three/drei'
+import { Birds } from './Birds'
 import { BoardPrompt } from './BoardPrompt'
 import { Bugs } from './Bugs'
 import { BugReportCard } from './BugReportCard'
 import { Buildings } from './Buildings'
 import { CameraRig } from './CameraRig'
+import { Crabs } from './Crabs'
 import { isTouch, quality } from './device'
 import { HiddenBugs } from './HiddenBugs'
 import { CoverageBar, Minimap } from './Hud'
 import { Island } from './Island'
+import { Ocean } from './Ocean'
 import { Player } from './Player'
 import { EndScreen, StartScreen, WelcomeBoard } from './Screens'
 import { useGameAudio } from './sound'
@@ -51,6 +54,9 @@ export default function Game() {
           shadow-bias={-0.0005}
         />
         <Island />
+        <Ocean />
+        <Crabs />
+        <Birds />
         <Buildings />
         <HiddenBugs />
         <Player />

@@ -1,6 +1,8 @@
 import { useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three'
+import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, SphereGeometry } from 'three'
+import { animateBoss, BossModel, type BossParts } from './BossBug'
+import { Kit, rod } from './kit'
 import { BUG_SPECS, BUGS, startMotion, stepBug, zoneOf, type BugDef, type BugKind } from './bugs'
 import { SWING_TIME } from './Player'
 import { useGame } from './store'
@@ -11,7 +13,7 @@ export const NET_DOWN_TO = 0.55
 /** Length of the catch animation, in seconds. */
 const CATCH_TIME = 0.9
 
-const SHELL: Record<BugKind, string> = { normal: '#FF7452', golden: '#F2C14E', boss: '#D9452B' }
+const SHELL: Record<BugKind, string> = { normal: '#E8392B', golden: '#F2C14E', boss: '#D9452B' }
 const SPOTS: Record<BugKind, string> = { normal: '#1A1A1A', golden: '#7A5410', boss: '#1A1A1A' }
 
 /** Distance from (x, z) to the line segment a-b on the ground. */
@@ -31,7 +33,13 @@ function makeMats(kind: BugKind) {
   return {
     shell:
       kind === 'golden'
-        ? new MeshStandardMaterial({ color: SHELL.golden, roughness: 0.3, metalness: 0.4, emissive: '#F2C14E', emissiveIntensity: 0.3 })
+        ? new MeshStandardMaterial({
+            color: SHELL.golden,
+            roughness: 0.3,
+            metalness: 0.4,
+            emissive: '#F2C14E',
+            emissiveIntensity: 0.3,
+          })
         : m(SHELL[kind], 0.4),
     spot: m(SPOTS[kind]),
     body: m('#1A1A1A', 0.8),
@@ -48,111 +56,95 @@ const SPOT_DIRS: [number, number][] = [
   [0.45, -0.75],
 ]
 
-/** Point on the shell ellipsoid in a given direction. */
-function shellPoint(side: number, across: number, along: number): [number, number, number] {
+/** Point on the shell ellipsoid in a given direction, `lift` times the shell size. */
+function shellPoint(side: number, across: number, along: number, lift = 1): [number, number, number] {
   const x = Math.sin(across) * Math.cos(along) * side
   const y = Math.cos(across) * Math.cos(along)
   const z = Math.sin(along)
-  return [x * 0.46, 0.3 + y * 0.46 * 0.6, z * 0.46 * 1.15]
+  return [x * 0.46 * lift, 0.3 + y * 0.46 * 0.6 * lift, z * 0.46 * 1.15 * lift]
 }
 
-/** One leg, pivoting where it meets the body. */
-function Leg({ legRef, x, z, mats }: { legRef: (g: Group | null) => void; x: number; z: number; mats: Mats }) {
-  const side = Math.sign(x)
-  return (
-    <group ref={legRef} position={[x, 0.18, z]}>
-      <mesh position={[side * 0.16, -0.06, 0]} rotation-z={side * 1.15} material={mats.body}>
-        <cylinderGeometry args={[0.025, 0.02, 0.36, 5]} />
-      </mesh>
-    </group>
-  )
+/** Colour-per-part material for the merged bug details. */
+const DETAIL = new MeshStandardMaterial({ vertexColors: true, roughness: 0.45 })
+
+const hex = (m: MeshStandardMaterial) => `#${m.color.getHexString()}`
+
+/** Leg for the right side, from the hip: thigh up and out, shin down to a little foot. */
+const LEG = (() => {
+  const kit = new Kit()
+  kit.add(rod([0, 0, 0], [0.16, 0.06, 0], 0.03, 0.025), '#000000')
+  kit.add(rod([0.16, 0.06, 0], [0.34, -0.17, 0.02], 0.025, 0.014), '#000000')
+  kit.ball(0.028, [0.16, 0.06, 0], '#000000')
+  kit.ball(0.024, [0.35, -0.18, 0.04], '#000000', { scale: [1, 0.6, 1.5] })
+  return kit.build().main!
+})()
+
+/**
+ * Builds a ladybug as two merged meshes: the shell (its own material, so golden bugs can glow)
+ * and everything else in one piece with per-part colours.
+ */
+function bugGeometry(kind: BugKind, mats: Mats) {
+  const shell = new Kit()
+  for (const s of [-1, 1]) {
+    const half = new SphereGeometry(0.46, 18, 12, s > 0 ? Math.PI / 2 : -Math.PI / 2, Math.PI, 0, Math.PI / 2)
+    half.scale(1, 0.6, 1.15)
+    shell.add(half, '#ffffff', [s * 0.025, 0.3, 0])
+  }
+
+  const body = hex(mats.body)
+  const d = new Kit()
+  // Dark body underneath, shows as the line between the wings.
+  d.ball(0.42, [0, 0.28, 0], body, { scale: [0.95, 0.55, 1.1] })
+  for (const s of [-1, 1]) {
+    // Spots, and a soft shine on each wing.
+    SPOT_DIRS.forEach(([across, along], i) =>
+      d.ball(i === 0 ? 0.08 : 0.07, shellPoint(s, across, along, 1.005), hex(mats.spot), { scale: [1, 0.5, 1] }),
+    )
+    d.ball(0.07, shellPoint(s, 0.38, 0.05, 1.01), '#FFFFFF', { scale: [0.7, 0.3, 1.5] })
+  }
+  // Shield behind the head with the two white patches real ladybugs have.
+  d.ball(0.24, [0, 0.36, 0.42], body, { scale: [1, 0.5, 0.55] })
+  for (const s of [-1, 1]) d.ball(0.08, [s * 0.13, 0.42, 0.47], '#F4F1EA', { scale: [0.8, 0.35, 0.6] })
+  // Head, big shiny eyes.
+  d.ball(0.2, [0, 0.26, 0.55], body)
+  for (const s of [-1, 1]) {
+    d.ball(0.075, [s * 0.1, 0.36, 0.66], hex(mats.eye))
+    d.ball(0.04, [s * 0.1, 0.37, 0.715], body)
+    d.ball(0.013, [s * 0.085, 0.395, 0.745], '#FFFFFF')
+  }
+  // Bent antennae with a bead in the middle and a club at the tip (gold on golden bugs).
+  const tip = kind === 'golden' ? hex(mats.shell) : body
+  for (const s of [-1, 1]) {
+    const base: [number, number, number] = [s * 0.07, 0.42, 0.62]
+    const mid: [number, number, number] = [s * 0.13, 0.58, 0.72]
+    const end: [number, number, number] = [s * 0.21, 0.68, 0.69]
+    d.add(rod(base, mid, 0.016, 0.014), body)
+    d.add(rod(mid, end, 0.014, 0.012), body)
+    d.ball(0.022, mid, body)
+    d.ball(0.042, end, tip, { scale: [1, 1.2, 1] })
+  }
+  return { shell: shell.build().main!, detail: d.build().main! }
 }
 
-/** Cute ladybug facing +z. Golden bugs shine, the boss has horns and a tie. */
+/** Cute ladybug facing +z: shell, details and six legs. Golden bugs shine. */
 export function BugModel({ kind, mats, legs }: { kind: BugKind; mats: Mats; legs: RefObject<(Group | null)[]> }) {
+  const geo = useMemo(() => bugGeometry(kind, mats), [kind, mats])
   return (
     <>
-      {/* Dark body underneath, shows as the line between the wings */}
-      <mesh position-y={0.28} scale={[0.95, 0.55, 1.1]} material={mats.body} castShadow>
-        <sphereGeometry args={[0.42, 16, 10]} />
-      </mesh>
-
-      {/* Two wing halves, slightly apart */}
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.025, 0.3, 0]} scale={[1, 0.6, 1.15]} material={mats.shell} castShadow>
-          <sphereGeometry args={[0.46, 16, 12, s > 0 ? Math.PI / 2 : -Math.PI / 2, Math.PI, 0, Math.PI / 2]} />
-        </mesh>
-      ))}
-
-      {/* Spots */}
-      {[-1, 1].flatMap((s) =>
-        SPOT_DIRS.map(([across, along], i) => (
-          <mesh key={`${s}-${i}`} position={shellPoint(s, across, along)} scale={[1, 0.5, 1]} material={mats.spot}>
-            <sphereGeometry args={[0.075, 8, 6]} />
-          </mesh>
-        )),
-      )}
-
-      {/* Head with big eyes */}
-      <mesh position={[0, 0.26, 0.52]} material={mats.body} castShadow>
-        <sphereGeometry args={[0.21, 14, 10]} />
-      </mesh>
-      {[-1, 1].map((s) => (
-        <group key={s} position={[s * 0.1, 0.36, 0.64]}>
-          <mesh material={mats.eye}>
-            <sphereGeometry args={[0.075, 10, 8]} />
-          </mesh>
-          <mesh position={[0, 0.01, 0.05]} material={mats.body}>
-            <sphereGeometry args={[0.04, 8, 6]} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* Antennae */}
-      {[-1, 1].map((s) => (
-        <group key={s} position={[s * 0.08, 0.42, 0.6]} rotation={[0.6, 0, s * -0.5]}>
-          <mesh position-y={0.14} material={mats.body}>
-            <cylinderGeometry args={[0.015, 0.015, 0.28, 4]} />
-          </mesh>
-          <mesh position-y={0.29} material={kind === 'golden' ? mats.shell : mats.body}>
-            <sphereGeometry args={[0.04, 6, 5]} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* Legs: three per side */}
+      <mesh geometry={geo.detail} material={DETAIL} castShadow />
+      <mesh geometry={geo.shell} material={mats.shell} castShadow />
       {[-1, 1].flatMap((s, si) =>
         [0.25, 0, -0.25].map((z, i) => (
-          <Leg
+          <group
             key={`${s}-${i}`}
-            x={s * 0.32}
-            z={z}
-            mats={mats}
-            legRef={(g) => {
+            ref={(g) => {
               legs.current[si * 3 + i] = g
             }}
-          />
+            position={[s * 0.32, 0.18, z]}
+          >
+            <mesh geometry={LEG} material={mats.body} scale-x={s} />
+          </group>
         )),
-      )}
-
-      {kind === 'boss' && (
-        <>
-          {/* Little horns and an office tie */}
-          {[-1, 1].map((s) => (
-            <mesh key={s} position={[s * 0.15, 0.44, 0.48]} rotation-z={s * -0.5} material={mats.horn}>
-              <coneGeometry args={[0.05, 0.16, 6]} />
-            </mesh>
-          ))}
-          {/* Angry brows */}
-          {[-1, 1].map((s) => (
-            <mesh key={s} position={[s * 0.1, 0.45, 0.66]} rotation-z={s * 0.4} material={mats.body}>
-              <boxGeometry args={[0.11, 0.025, 0.03]} />
-            </mesh>
-          ))}
-          <mesh position={[0, 0.1, 0.66]} rotation-x={0.3} material={mats.tie}>
-            <coneGeometry args={[0.06, 0.2, 4]} />
-          </mesh>
-        </>
       )}
     </>
   )
@@ -173,6 +165,9 @@ function Bug({ def }: { def: BugDef }) {
   const burst = useRef<Group>(null)
   const pop = useRef<Mesh>(null)
   const legs = useRef<(Group | null)[]>([])
+  const boss = useRef<BossParts>({ cases: [], wings: [] })
+  /** Boss only: how far its wings are open, 0..1. */
+  const wingsOpen = useRef(0)
   const motion = useRef(startMotion(def))
   const caughtAt = useRef<number | null>(null)
   const done = useRef(useGame.getState().caught.includes(def.id))
@@ -255,6 +250,12 @@ function Bug({ def }: { def: BugDef }) {
       leg.rotation.y = Math.sin(m.phase) * 0.5 * alt * running
     })
     body.current.position.y = Math.abs(Math.sin(m.phase)) * 0.06 * running
+    // The boss spreads its wings and buzzes while the player is in its zone.
+    if (def.kind === 'boss') {
+      const near = Math.hypot(state.focus[0] - zone.position[0], state.focus[1] - zone.position[1]) < zone.radius + 1
+      wingsOpen.current += ((near ? 1 : 0) - wingsOpen.current) * (1 - Math.exp(-4 * dt))
+      body.current.position.y += animateBoss(boss.current, wingsOpen.current, now)
+    }
     // Shiver when scared, so the player sees it noticed them.
     body.current.rotation.z = m.mode === 'flee' ? Math.sin(now * 40) * 0.06 : 0
 
@@ -274,7 +275,11 @@ function Bug({ def }: { def: BugDef }) {
       </mesh>
 
       <group ref={body}>
-        <BugModel kind={def.kind} mats={mats} legs={legs} />
+        {def.kind === 'boss' ? (
+          <BossModel mats={mats} legs={legs} boss={boss} />
+        ) : (
+          <BugModel kind={def.kind} mats={mats} legs={legs} />
+        )}
       </group>
 
       {/* Golden bugs: three little sparkles circling above, so they stand out */}
