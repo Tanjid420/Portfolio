@@ -163,17 +163,17 @@ function textTexture(text: string, color: string, width = 512, height = 112): Ca
 /** Glass-front office for the job. */
 function Office() {
   const windowsTop = [-1.65, -0.55, 0.55, 1.65]
-  const nameTexture = useMemo(() => textTexture('Resonian Inc.', '#8FD3FF'), [])
+  const nameTexture = useMemo(() => textTexture('Resonian Inc.', '#8FD3FF', 512, 128), [])
   return (
     <>
       {/* Company name on the roof, tilted back so the camera reads it */}
       {[-1.7, 1.7].map((x) => (
         <Block key={x} size={[0.1, 0.6, 0.1]} at={[x, 4.1, 1.3]} color={C.dark} />
       ))}
-      <group position={[0, 4.5, 1.35]} rotation-x={-0.35}>
-        <Block size={[4.3, 0.95, 0.1]} at={[0, 0, -0.03]} color={C.dark} />
+      <group position={[0, 4.7, 1.35]} rotation-x={-0.35}>
+        <Block size={[5, 1.35, 0.1]} at={[0, 0, -0.03]} color={C.dark} />
         <mesh position-z={0.03}>
-          <planeGeometry args={[4.1, 0.9]} />
+          <planeGeometry args={[4.8, 1.2]} />
           <meshBasicMaterial map={nameTexture} toneMapped={false} />
         </mesh>
       </group>
