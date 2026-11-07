@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react'
 import { cv, cvPdfUrl } from '../data/cv'
 
 // Plain, fast CV page. Also the fallback when the 3D game can't load.
-export function CvPage() {
+export function CvPage({ notice }: { notice?: ReactNode }) {
   const { contact, job, education } = cv
   return (
     <main className="cv" data-testid="cv-page">
+      {notice}
       <section className="cv-head">
         <h1>{cv.name}</h1>
         <p className="cv-title">{cv.title}</p>

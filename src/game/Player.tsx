@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide, Group, MeshStandardMaterial, Vector3 } from 'three'
+import { touch } from './input'
 import { PLAYER_START, useGame } from './store'
 import { isWalkable } from './world'
 
@@ -251,16 +252,23 @@ export function Player() {
     const state = useGame.getState()
     // The hero waits while a bug report is open.
     const paused = state.cardQueue.length > 0
+    if (touch.swing) {
+      touch.swing = false
+      swingRequested.current = true
+    }
     if (paused) swingRequested.current = false
 
-    // Movement: screen up is -z because the camera looks north.
-    let dx = paused ? 0 : (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
-    let dz = paused ? 0 : (keys.down ? 1 : 0) - (keys.up ? 1 : 0)
+    // Movement: screen up is -z because the camera looks north. Keys and the joystick add up.
+    let dx = paused ? 0 : (keys.right ? 1 : 0) - (keys.left ? 1 : 0) + touch.x
+    let dz = paused ? 0 : (keys.down ? 1 : 0) - (keys.up ? 1 : 0) + touch.z
     const len = Math.hypot(dx, dz)
     let moved = 0
-    if (len > 0) {
-      dx /= len
-      dz /= len
+    if (len > 0.01) {
+      // Full speed caps at 1. A light joystick push walks slower.
+      if (len > 1) {
+        dx /= len
+        dz /= len
+      }
       const step = SPEED * delta
       const nx = m.x + dx * step
       const nz = m.z + dz * step

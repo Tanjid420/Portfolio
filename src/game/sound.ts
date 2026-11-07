@@ -180,7 +180,8 @@ export function useGameAudio() {
     applyState()
     if (ctx) startMusic()
 
-    // The first click or key press unlocks audio. Sound is on by default.
+    // The first click, tap or key press unlocks audio. Sound is on by default.
+    // Phones only count the end of a tap as a click, so listen for that too.
     const unlock = () => {
       if (!setup()) return
       applyState()
@@ -193,6 +194,8 @@ export function useGameAudio() {
       unlock()
     }
     window.addEventListener('pointerdown', unlock)
+    window.addEventListener('pointerup', unlock)
+    window.addEventListener('touchend', unlock)
     window.addEventListener('keydown', onKey)
     document.addEventListener('visibilitychange', applyState)
     const offSettings = useSoundSettings.subscribe(applyState)
@@ -212,6 +215,8 @@ export function useGameAudio() {
       stopMusic()
       applyState()
       window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('pointerup', unlock)
+      window.removeEventListener('touchend', unlock)
       window.removeEventListener('keydown', onKey)
       document.removeEventListener('visibilitychange', applyState)
       offSettings()

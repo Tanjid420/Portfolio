@@ -246,3 +246,61 @@ a { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   .report { animation: none; }
 }
+
+/* Fallback note on the CV page when the 3D island can't start */
+.cv-notice {
+  margin: 0 0 24px !important;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Phones: swipes on the game must not scroll or zoom the page */
+.game { touch-action: none; -webkit-user-select: none; user-select: none; }
+
+/* Touch controls: joystick bottom left, net button bottom right */
+.touch-controls {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 15;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 20px max(20px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.touch-stick {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(15, 23, 18, 0.45);
+  border: 2px solid rgba(228, 237, 230, 0.35);
+  pointer-events: auto;
+  touch-action: none;
+}
+.touch-knob {
+  position: absolute;
+  inset: 34px;
+  border-radius: 50%;
+  background: rgba(228, 237, 230, 0.85);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+.touch-net {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 2px solid var(--text);
+  background: var(--accent);
+  color: var(--bg);
+  font: 700 16px system-ui, sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-net:active { transform: scale(0.92); filter: brightness(1.1); }
