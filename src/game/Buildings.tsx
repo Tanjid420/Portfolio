@@ -3,7 +3,7 @@
 
 import { useMemo, useRef, type ReactNode } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { ExtrudeGeometry, Group, Shape } from 'three'
+import { CanvasTexture, ExtrudeGeometry, Group, Shape, SRGBColorSpace } from 'three'
 import { BUILDINGS, NOTICE_BOARD, type ZoneId } from './world'
 
 type V3 = [number, number, number]
@@ -141,11 +141,42 @@ function Table({
   )
 }
 
+/** Light text on a dark panel, drawn to a canvas for signs. */
+function textTexture(text: string, color: string, width = 512, height = 112): CanvasTexture {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')!
+  ctx.fillStyle = C.dark
+  ctx.fillRect(0, 0, width, height)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = color
+  ctx.font = `bold ${Math.round(height * 0.6)}px system-ui, sans-serif`
+  ctx.fillText(text, width / 2, height / 2 + 4, width - 24)
+  const tex = new CanvasTexture(canvas)
+  tex.colorSpace = SRGBColorSpace
+  tex.anisotropy = 4
+  return tex
+}
+
 /** Glass-front office for the job. */
 function Office() {
   const windowsTop = [-1.65, -0.55, 0.55, 1.65]
+  const nameTexture = useMemo(() => textTexture('Resonian Inc.', '#8FD3FF'), [])
   return (
     <>
+      {/* Company name on the roof, tilted back so the camera reads it */}
+      {[-1.7, 1.7].map((x) => (
+        <Block key={x} size={[0.1, 0.6, 0.1]} at={[x, 4.1, 1.3]} color={C.dark} />
+      ))}
+      <group position={[0, 4.5, 1.35]} rotation-x={-0.35}>
+        <Block size={[4.3, 0.95, 0.1]} at={[0, 0, -0.03]} color={C.dark} />
+        <mesh position-z={0.03}>
+          <planeGeometry args={[4.1, 0.9]} />
+          <meshBasicMaterial map={nameTexture} toneMapped={false} />
+        </mesh>
+      </group>
       <Block size={[4.8, 3.6, 3.6]} at={[0, 1.8, 0]} color="#D5DED8" />
       <Block size={[4.85, 0.18, 3.65]} at={[0, 3.25, 0]} color={C.accent} />
       <Block size={[5.1, 0.25, 3.9]} at={[0, 3.72, 0]} color={C.dark} />
