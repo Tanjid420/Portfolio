@@ -6,21 +6,25 @@ import { isWalkable } from './world'
 
 const SPEED = 7 // units per second
 const BODY_RADIUS = 0.7
-/** The model is built about 1.8 units tall, then scaled up so it reads well from the high camera. */
-const MODEL_SCALE = 1.7
+/** The model is built about 2.2 units tall, then scaled up so it reads well from the high camera. */
+const MODEL_SCALE = 1.6
 /** How long one net swing takes, in seconds. */
 export const SWING_TIME = 0.4
 
 const COLORS = {
-  skin: '#F5D0A9',
-  hair: '#3B2A20',
-  hoodie: '#5DBB8C',
-  pants: '#2B3A4A',
-  shoes: '#17221B',
-  mask: '#17221B',
+  skin: '#E8B98F',
+  skinShade: '#D49E74',
+  hair: '#2A1C14',
+  jacket: '#3E7BE0', // blue, so the hero stands out from the green island
+  zip: '#E4EDE6',
+  pants: '#2E3440',
+  shoes: '#F4F4F4',
+  sole: '#3A3A3A',
+  mask: '#1B2540',
   eye: '#FFFFFF',
-  pupil: '#0F1712',
-  blush: '#F59A8B',
+  iris: '#4A2F1E',
+  mouth: '#9C3B3B',
+  badge: '#F2C14E',
   handle: '#8A6440',
   ring: '#E4EDE6',
 }
@@ -103,14 +107,95 @@ function useKeyboard() {
   return { held, swingRequested }
 }
 
-function Leg({ groupRef, x, mats }: { groupRef: RefObject<Group | null>; x: number; mats: { pants: MeshStandardMaterial; shoes: MeshStandardMaterial } }) {
+type Mats = Record<string, MeshStandardMaterial>
+
+/** One leg, pivoting at the hip. */
+function Leg({ groupRef, x, mats }: { groupRef: RefObject<Group | null>; x: number; mats: Mats }) {
   return (
-    <group ref={groupRef} position={[x, 0.55, 0]}>
-      <mesh position-y={-0.22} material={mats.pants} castShadow>
-        <cylinderGeometry args={[0.11, 0.12, 0.42, 6]} />
+    <group ref={groupRef} position={[x, 0.86, 0]}>
+      <mesh position-y={-0.38} material={mats.pants} castShadow>
+        <cylinderGeometry args={[0.1, 0.085, 0.76, 10]} />
       </mesh>
-      <mesh position={[0, -0.47, 0.05]} material={mats.shoes} castShadow>
-        <boxGeometry args={[0.2, 0.12, 0.3]} />
+      <mesh position={[0, -0.8, 0.05]} material={mats.shoes} castShadow>
+        <boxGeometry args={[0.16, 0.09, 0.3]} />
+      </mesh>
+      <mesh position={[0, -0.85, 0.05]} material={mats.sole}>
+        <boxGeometry args={[0.17, 0.03, 0.31]} />
+      </mesh>
+    </group>
+  )
+}
+
+/** One arm, pivoting at the shoulder. The hand ends at y = -0.56. */
+function Arm({ mats }: { mats: Mats }) {
+  return (
+    <>
+      <mesh position-y={-0.26} material={mats.jacket} castShadow>
+        <capsuleGeometry args={[0.075, 0.38, 4, 10]} />
+      </mesh>
+      <mesh position-y={-0.57} material={mats.skin}>
+        <sphereGeometry args={[0.07, 10, 8]} />
+      </mesh>
+    </>
+  )
+}
+
+/** Head with a readable face: brows, eyes behind a slim hero mask, nose and a smile. */
+function Head({ mats }: { mats: Mats }) {
+  return (
+    // Tipped up a little so the face shows to the high camera.
+    <group position-y={1.9} rotation-x={-0.2}>
+      <group scale={[0.92, 1.05, 0.95]}>
+        <mesh material={mats.skin} castShadow>
+          <sphereGeometry args={[0.26, 24, 16]} />
+        </mesh>
+        {/* Hair: a cap tipped back so the forehead shows */}
+        <mesh position={[0, 0.02, -0.03]} rotation-x={-0.65} material={mats.hair} castShadow>
+          <sphereGeometry args={[0.275, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+        </mesh>
+        {/* Slim hero mask across the eyes, front half only */}
+        <mesh position-y={0.02} material={mats.mask}>
+          <cylinderGeometry args={[0.266, 0.262, 0.1, 24, 1, true, -1.3, 2.6]} />
+        </mesh>
+      </group>
+
+      {/* Ears */}
+      {[-1, 1].map((s) => (
+        <mesh key={s} position={[s * 0.235, 0, 0]} scale={[0.5, 1, 0.8]} material={mats.skinShade}>
+          <sphereGeometry args={[0.055, 10, 8]} />
+        </mesh>
+      ))}
+
+      {/* Eyes: white, brown iris, small shine */}
+      {[-1, 1].map((s) => (
+        <group key={s} position={[s * 0.085, 0.02, 0.238]}>
+          <mesh scale={[1, 1.1, 0.5]} material={mats.eye}>
+            <sphereGeometry args={[0.05, 14, 10]} />
+          </mesh>
+          <mesh position-z={0.018} scale={[1, 1, 0.5]} material={mats.iris}>
+            <sphereGeometry args={[0.03, 12, 8]} />
+          </mesh>
+          <mesh position={[0.01, 0.012, 0.035]} material={mats.eye}>
+            <sphereGeometry args={[0.009, 6, 4]} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Eyebrows */}
+      {[-1, 1].map((s) => (
+        <mesh key={s} position={[s * 0.085, 0.095, 0.236]} rotation-z={s * -0.15} material={mats.hair}>
+          <boxGeometry args={[0.075, 0.018, 0.02]} />
+        </mesh>
+      ))}
+
+      {/* Nose */}
+      <mesh position={[0, -0.045, 0.255]} scale={[0.8, 1, 1]} material={mats.skinShade}>
+        <sphereGeometry args={[0.03, 10, 8]} />
+      </mesh>
+
+      {/* Smile */}
+      <mesh position={[0, -0.11, 0.228]} rotation={[-0.3, 0, Math.PI]} material={mats.mouth}>
+        <torusGeometry args={[0.045, 0.012, 6, 12, Math.PI]} />
       </mesh>
     </group>
   )
@@ -131,18 +216,22 @@ export function Player() {
   const { held, swingRequested } = useKeyboard()
   const motion = useRef({ x: PLAYER_START[0], z: PLAYER_START[1], facing: 0, walk: 0, phase: 0 })
 
-  const mats = useMemo(() => {
-    const m = (color: string) => new MeshStandardMaterial({ color, flatShading: true, roughness: 0.8 })
+  const mats = useMemo<Mats>(() => {
+    const m = (color: string, roughness = 0.75) => new MeshStandardMaterial({ color, roughness })
     return {
-      skin: m(COLORS.skin),
-      hair: m(COLORS.hair),
-      hoodie: m(COLORS.hoodie),
-      pants: m(COLORS.pants),
-      shoes: m(COLORS.shoes),
-      mask: m(COLORS.mask),
-      eye: new MeshStandardMaterial({ color: COLORS.eye, roughness: 0.4 }),
-      pupil: new MeshStandardMaterial({ color: COLORS.pupil, roughness: 0.3 }),
-      blush: m(COLORS.blush),
+      skin: m(COLORS.skin, 0.6),
+      skinShade: m(COLORS.skinShade, 0.6),
+      hair: m(COLORS.hair, 0.9),
+      jacket: m(COLORS.jacket, 0.7),
+      zip: m(COLORS.zip),
+      pants: m(COLORS.pants, 0.9),
+      shoes: m(COLORS.shoes, 0.5),
+      sole: m(COLORS.sole),
+      mask: new MeshStandardMaterial({ color: COLORS.mask, roughness: 0.5, side: DoubleSide }),
+      eye: m(COLORS.eye, 0.3),
+      iris: m(COLORS.iris, 0.3),
+      mouth: m(COLORS.mouth, 0.6),
+      badge: m(COLORS.badge, 0.5),
       handle: m(COLORS.handle),
       ring: m(COLORS.ring),
       net: new MeshStandardMaterial({
@@ -232,87 +321,61 @@ export function Player() {
     <group ref={root} position={[PLAYER_START[0], 0, PLAYER_START[1]]} scale={MODEL_SCALE}>
       {/* Soft round shadow so the hero reads well from above */}
       <mesh rotation-x={-Math.PI / 2} position-y={0.13}>
-        <circleGeometry args={[0.55, 20]} />
+        <circleGeometry args={[0.45, 20]} />
         <meshBasicMaterial color="#000000" transparent opacity={0.25} depthWrite={false} />
       </mesh>
 
       <group ref={bob}>
-        {/* Legs, pivoting at the hips */}
-        <Leg groupRef={legL} x={-0.15} mats={mats} />
-        <Leg groupRef={legR} x={0.15} mats={mats} />
+        {/* Legs */}
+        <Leg groupRef={legL} x={-0.11} mats={mats} />
+        <Leg groupRef={legR} x={0.11} mats={mats} />
 
-        {/* Body */}
-        <mesh position-y={0.85} material={mats.hoodie} castShadow>
-          <capsuleGeometry args={[0.3, 0.3, 4, 8]} />
+        {/* Hips */}
+        <mesh position-y={0.86} scale={[1, 1, 0.75]} material={mats.pants} castShadow>
+          <cylinderGeometry args={[0.23, 0.21, 0.18, 14]} />
         </mesh>
 
-        {/* Head: big and round, chibi style */}
-        <group position-y={1.55}>
-          <mesh material={mats.skin} castShadow>
-            <icosahedronGeometry args={[0.44, 1]} />
-          </mesh>
-          {/* Hair cap */}
-          <mesh position-y={0.08} rotation-x={-0.25} material={mats.hair} castShadow>
-            <sphereGeometry args={[0.46, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.42]} />
-          </mesh>
-          {/* Hero mask: a band around the eyes with two tails at the back */}
-          <mesh position-y={0.02} material={mats.mask}>
-            <cylinderGeometry args={[0.455, 0.455, 0.18, 16, 1, true]} />
-          </mesh>
-          {[-0.12, 0.12].map((x) => (
-            <mesh key={x} position={[x, -0.08, -0.45]} rotation={[0.6, 0, x * 2]} material={mats.mask}>
-              <boxGeometry args={[0.08, 0.32, 0.03]} />
-            </mesh>
-          ))}
-          {/* Eyes peek through the mask */}
-          {[-0.15, 0.15].map((x) => (
-            <group key={x} position={[x, 0.02, 0.41]}>
-              <mesh material={mats.eye} scale={[1, 1.2, 0.6]}>
-                <sphereGeometry args={[0.085, 10, 8]} />
-              </mesh>
-              <mesh position={[0, -0.01, 0.045]} material={mats.pupil}>
-                <sphereGeometry args={[0.045, 8, 6]} />
-              </mesh>
-            </group>
-          ))}
-          {/* Rosy cheeks */}
-          {[-0.24, 0.24].map((x) => (
-            <mesh key={x} position={[x, -0.15, 0.36]} material={mats.blush} scale={[1, 0.6, 0.4]}>
-              <sphereGeometry args={[0.06, 8, 6]} />
-            </mesh>
-          ))}
-        </group>
+        {/* Torso: blue jacket with a zip and a yellow QA badge */}
+        <mesh position-y={1.17} scale={[1, 1, 0.72]} material={mats.jacket} castShadow>
+          <capsuleGeometry args={[0.25, 0.36, 6, 14]} />
+        </mesh>
+        <mesh position={[0, 1.15, 0.183]} material={mats.zip}>
+          <boxGeometry args={[0.022, 0.5, 0.01]} />
+        </mesh>
+        <mesh position={[0.11, 1.28, 0.175]} rotation-x={-0.15} material={mats.badge}>
+          <boxGeometry args={[0.08, 0.1, 0.015]} />
+        </mesh>
+
+        {/* Neck */}
+        <mesh position-y={1.66} material={mats.skin}>
+          <cylinderGeometry args={[0.075, 0.08, 0.16, 10]} />
+        </mesh>
+
+        <Head mats={mats} />
 
         {/* Left arm swings while walking */}
-        <group ref={armL} position={[-0.38, 1.05, 0]}>
-          <mesh position-y={-0.2} material={mats.hoodie} castShadow>
-            <capsuleGeometry args={[0.08, 0.26, 3, 6]} />
-          </mesh>
-          <mesh position-y={-0.42} material={mats.skin}>
-            <sphereGeometry args={[0.09, 8, 6]} />
-          </mesh>
+        <group ref={armL} position={[-0.31, 1.47, 0]}>
+          <Arm mats={mats} />
         </group>
 
         {/* Right arm holds the bug net */}
-        <group ref={armR} position={[0.38, 1.05, 0]} rotation-x={POSE.idle.arm}>
-          <mesh position-y={-0.2} material={mats.hoodie} castShadow>
-            <capsuleGeometry args={[0.08, 0.26, 3, 6]} />
-          </mesh>
-          <mesh position-y={-0.42} material={mats.skin}>
-            <sphereGeometry args={[0.09, 8, 6]} />
-          </mesh>
-          <group ref={wrist} position-y={-0.42} rotation-x={POSE.idle.wrist}>
-            {/* Handle points along +y from the hand */}
-            <mesh position-y={0.55} material={mats.handle} castShadow>
-              <cylinderGeometry args={[0.035, 0.035, 1.3, 6]} />
-            </mesh>
-            <group ref={ring} position-y={1.52}>
-              <mesh material={mats.ring} castShadow>
-                <torusGeometry args={[0.32, 0.03, 6, 20]} />
+        <group ref={armR} position={[0.31, 1.47, 0]} rotation-x={POSE.idle.arm}>
+          <Arm mats={mats} />
+          <group ref={wrist} position-y={-0.57} rotation-x={POSE.idle.wrist}>
+            {/* Leans out to the side so the net never hides the face */}
+            <group rotation-z={-0.35}>
+              {/* Handle points along +y from the hand */}
+              <mesh position-y={0.55} material={mats.handle} castShadow>
+                <cylinderGeometry args={[0.035, 0.035, 1.3, 6]} />
               </mesh>
-              <mesh position-z={-0.3} rotation-x={-Math.PI / 2} material={mats.net}>
-                <coneGeometry args={[0.31, 0.6, 12, 3, true]} />
-              </mesh>
+              <group ref={ring} position-y={1.52}>
+                <mesh material={mats.ring} castShadow>
+                  <torusGeometry args={[0.32, 0.03, 6, 20]} />
+                </mesh>
+                <mesh position-z={-0.3} rotation-x={-Math.PI / 2} material={mats.net}>
+                  <coneGeometry args={[0.31, 0.6, 12, 3, true]} />
+                </mesh>
+              </group>
             </group>
           </group>
         </group>
