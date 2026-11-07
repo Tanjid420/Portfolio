@@ -1,0 +1,24 @@
+# Private CV files (keep out of the public repo)
+TangidKhan_QA_ki.pdf
+cv-text.txt
+*.pdf
+
+# ...except the public copy used by the Download CV button
+!public/Tangid_Khan_CV.pdf
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Editor / OS
+.vscode/
+.DS_Store
+*.log
+
+# TypeScript build cache
+*.tsbuildinfo

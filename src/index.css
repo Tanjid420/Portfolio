@@ -1,0 +1,12 @@
+:root {
+  --bg: #0F1712;
+  --text: #E4EDE6;
+  --accent: #5DBB8C;
+}
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
