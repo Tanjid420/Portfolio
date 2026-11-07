@@ -20,8 +20,13 @@ interface GameState {
   catchBug: (id: string) => void
   /** Bug report cards waiting to be read. The first one is on screen. One swing can catch two bugs. */
   cardQueue: string[]
+  /** When the card on screen opened (performance.now()). Used to ignore closing for a moment. */
+  cardOpenedAt: number
   closeCard: () => void
 }
+
+/** Wait after a catch before the card shows, so the player sees the bug get scooped up. */
+export const CARD_SHOW_DELAY_MS = 700
 
 export const PLAYER_START: [number, number] = [startX, startZ + 2.5]
 
@@ -41,10 +46,14 @@ export const useGame = create<GameState>((set) => ({
             caught: [...s.caught, id],
             lastCatch: { id, at: performance.now() },
             cardQueue: [...s.cardQueue, id],
+            cardOpenedAt: s.cardQueue.length ? s.cardOpenedAt : performance.now(),
           },
     ),
   cardQueue: [],
-  closeCard: () => set((s) => ({ cardQueue: s.cardQueue.slice(1) })),
+  cardOpenedAt: 0,
+  // The next card in the queue shows right away: its catch animation already played.
+  closeCard: () =>
+    set((s) => ({ cardQueue: s.cardQueue.slice(1), cardOpenedAt: performance.now() - CARD_SHOW_DELAY_MS })),
 }))
 
 // Lets local checks and tests read the game state from the browser console.
