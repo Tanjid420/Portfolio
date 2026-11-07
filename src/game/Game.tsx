@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { Bugs } from './Bugs'
 import { CameraRig } from './CameraRig'
 import { Island } from './Island'
 import { Player } from './Player'
@@ -31,6 +32,7 @@ export default function Game() {
       />
       <Island />
       <Player />
+      <Bugs />
       <CameraRig />
     </Canvas>
   )
