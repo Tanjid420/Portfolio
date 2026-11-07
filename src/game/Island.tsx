@@ -17,7 +17,16 @@ import {
   SRGBColorSpace,
   Vector3,
 } from 'three'
-import { coastRadius, isOnIsland, PATH_POINTS, seededRandom, ZONES, type Zone } from './world'
+import {
+  coastRadius,
+  isOnIsland,
+  MOUNTAINS,
+  PATH_POINTS,
+  seededRandom,
+  setScatterObstacles,
+  ZONES,
+  type Zone,
+} from './world'
 
 const COLORS = {
   grass: '#3A7550', // plan says #2E5E3E; lifted because the 3D lighting made it look muddy
@@ -205,14 +214,6 @@ function Instanced({ geometry, material, matrices }: { geometry: BufferGeometry;
   return <instancedMesh ref={ref} args={[geometry, material, matrices.length]} castShadow receiveShadow />
 }
 
-// Mountains on the north shore: [x, z, radius, height]
-const MOUNTAINS: [number, number, number, number][] = [
-  [-2, -29, 6, 9],
-  [7, -28, 4.5, 6.5],
-  [-21, -22, 4, 5.5],
-  [27, -17, 3.5, 5],
-]
-
 function Mountains() {
   return (
     <>
@@ -242,6 +243,7 @@ function useScatter(samples: Vector3[]) {
     const lower: Matrix4[] = []
     const upper: Matrix4[] = []
     const rocks: Matrix4[] = []
+    const obstacles: [number, number, number][] = []
 
     for (let tries = 0; tries < 600 && trunks.length < 70; tries++) {
       const x = (rand() * 2 - 1) * 40
@@ -256,6 +258,7 @@ function useScatter(samples: Vector3[]) {
         dummy.updateMatrix()
         list.push(dummy.matrix.clone())
       }
+      obstacles.push([x, z, 0.35 * s])
       place(0.5, trunks)
       place(1.8, lower)
       place(2.9, upper)
@@ -269,9 +272,11 @@ function useScatter(samples: Vector3[]) {
       dummy.rotation.set(rand() * 3, rand() * 3, rand() * 3)
       dummy.scale.set(0.5 + rand() * 0.7, 0.4 + rand() * 0.4, 0.5 + rand() * 0.7)
       dummy.updateMatrix()
+      obstacles.push([x, z, 0.8 * Math.max(dummy.scale.x, dummy.scale.z)])
       rocks.push(dummy.matrix.clone())
     }
 
+    setScatterObstacles(obstacles)
     return { trunks, lower, upper, rocks }
   }, [samples])
 }

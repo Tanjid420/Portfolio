@@ -82,8 +82,9 @@ Each step is sized for one session. Tick it when done.
 - [x] **0. Setup:** Vite + React + TypeScript, three.js, React Three Fiber, drei, zustand (game state), howler (sound), Playwright. GitHub Action deploys to Pages. Result: a spinning test cube live at `tanjid420.github.io/Portfolio`.
 - [x] **1. CV content + CV page:** turn the CV into `src/data/cv.ts`. Build the plain CV page and the fixed top bar (View CV / Download CV). The site is useful to recruiters from this step on.
 - [x] **2. The island:** low-poly ground, water, lighting, five zone spots, path in CV order, camera that follows from above.
-- [ ] **3. The player:** cute masked QA character with a net, walking, net swing, keyboard controls, island edges.
+- [x] **3. The player:** cute masked QA character with a net, walking, net swing, keyboard controls, island edges.
   - Notes from step 2: layout lives in `src/game/world.ts` (`ZONES`, `PATH_POINTS`, `isOnIsland()` for the edges). The camera follows `useGame().focus` in `src/game/store.ts`; the player should set it. Remove the temporary zone buttons (`ZonePreview` in `Game.tsx`, `.zone-preview` in `index.css`). Grass was lifted to `#3A7550`.
+  - Notes from step 3: hero lives in `src/game/Player.tsx`. Each frame it writes `focus` (position), `facing`, `netPos` (net ring [x, z]) and `swingStartedAt` (scene clock seconds) to the store. For catching in step 4: the net comes down between 0.3 and 0.55 of `SWING_TIME` (0.4 s); check bugs near `netPos` in that window. `isWalkable()` in `world.ts` blocks the coast, mountains, trees and rocks (bugs can use it too). Mobile joystick comes in step 8.
 - [ ] **4. The bugs:** bug models, wander and flee behavior, catching with the net.
 - [ ] **5. Bug reports + HUD:** ticket-style cards filled from `cv.ts`, test coverage bar, minimap.
 - [ ] **6. Zone details:** buildings and props for each zone, boss bugs for jobs, hidden bugs and the magnifying glass.

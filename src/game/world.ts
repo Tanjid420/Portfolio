@@ -38,6 +38,27 @@ export function isOnIsland(x: number, z: number, margin = 0): boolean {
   return Math.hypot(x, z) <= coastRadius(Math.atan2(z, x)) - margin
 }
 
+// Mountains on the north shore: [x, z, base radius, height]
+export const MOUNTAINS: [number, number, number, number][] = [
+  [-2, -29, 6, 9],
+  [7, -28, 4.5, 6.5],
+  [-21, -22, 4, 5.5],
+  [27, -17, 3.5, 5],
+]
+
+// Trees and rocks the player can't walk through, as [x, z, radius]. Filled by the island scatter.
+let scatterObstacles: [number, number, number][] = []
+export function setScatterObstacles(list: [number, number, number][]) {
+  scatterObstacles = list
+}
+
+/** True when a body of `radius` can stand at (x, z): on the grass and clear of mountains, trees and rocks. */
+export function isWalkable(x: number, z: number, radius = 0.5): boolean {
+  if (!isOnIsland(x, z, radius + 0.4)) return false
+  if (MOUNTAINS.some(([mx, mz, mr]) => Math.hypot(x - mx, z - mz) < mr * 0.95 + radius)) return false
+  return scatterObstacles.every(([ox, oz, or]) => Math.hypot(x - ox, z - oz) >= or + radius)
+}
+
 // Path control points: each zone plus a few bends so it winds a little.
 export const PATH_POINTS: [number, number][] = [
   [0, 34],
