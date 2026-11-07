@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { BUGS } from './bugs'
+import { HIDDEN_BUGS } from './hidden'
 import { useGame } from './store'
-import { coastRadius, MOUNTAINS, ZONES } from './world'
+import { BUILDINGS, coastRadius, MOUNTAINS, ZONES } from './world'
 
 // "Test coverage: 4 / 8 bugs caught · 50%"
 export function CoverageBar() {
   const caught = useGame((s) => s.caught.length)
+  const hasGlass = useGame((s) => s.hasGlass)
+  const found = useGame((s) => s.found.length)
   const total = BUGS.length
   const pct = Math.round((caught / total) * 100)
   return (
@@ -27,6 +30,11 @@ export function CoverageBar() {
       >
         <div style={{ width: `${pct}%` }} />
       </div>
+      {hasGlass ? (
+        <div className="hud-hidden" data-testid="hidden-count">
+          🔍 Hidden bugs: {found} / {HIDDEN_BUGS.length}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -72,6 +80,9 @@ export function Minimap() {
       <polygon points={coast} className="map-land" />
       {MOUNTAINS.map(([x, z, r], i) => (
         <circle key={i} cx={x} cy={z} r={r * 0.8} className="map-mountain" />
+      ))}
+      {BUILDINGS.map(({ zone, position: [x, z] }) => (
+        <rect key={zone} x={x - 2} y={z - 2} width={4} height={4} rx={0.8} className="map-building" />
       ))}
       {ZONES.map((zone) => {
         const bugs = BUGS.filter((b) => b.zone === zone.id)

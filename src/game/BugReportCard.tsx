@@ -68,8 +68,8 @@ export function BugReportCard() {
         <header className="report-head">
           <span className="report-id">{report.id}</span>
           <span className={`pill pill-${report.severity.toLowerCase()}`}>{report.severity}</span>
-          <span className="pill pill-resolved">✔ Resolved</span>
-          {report.kind === 'golden' ? <span className="report-star">★ Golden bug</span> : null}
+          <span className="pill pill-resolved">{report.status}</span>
+          {report.badge ? <span className="report-star">{report.badge}</span> : null}
         </header>
 
         {report.headline ? <p className="report-headline">{report.headline}</p> : null}

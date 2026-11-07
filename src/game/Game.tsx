@@ -1,7 +1,9 @@
 import { Canvas } from '@react-three/fiber'
 import { Bugs } from './Bugs'
 import { BugReportCard } from './BugReportCard'
+import { Buildings } from './Buildings'
 import { CameraRig } from './CameraRig'
+import { HiddenBugs } from './HiddenBugs'
 import { CoverageBar, Minimap } from './Hud'
 import { Island } from './Island'
 import { Player } from './Player'
@@ -34,6 +36,8 @@ export default function Game() {
           shadow-bias={-0.0005}
         />
         <Island />
+        <Buildings />
+        <HiddenBugs />
         <Player />
         <Bugs />
         <CameraRig />

@@ -176,6 +176,8 @@ a { color: var(--accent); }
 .map-zone-clear circle { stroke: var(--accent); fill: rgba(93, 187, 140, 0.35); }
 .map-zone-clear text { fill: var(--text); }
 .map-zone-info circle { stroke: var(--muted); }
+.map-building { fill: #E4EDE6; opacity: 0.7; }
+.hud-hidden { margin-top: 4px; font-size: 12px; color: #B794FF; }
 .map-hero path { fill: #fff; stroke: var(--bg); stroke-width: 0.8; }
 
 @media (max-width: 560px) {
@@ -215,6 +217,12 @@ a { color: var(--accent); }
 .pill-critical { background: #D9452B; color: #fff; }
 .pill-major { background: #F2C14E; color: #2a2006; }
 .pill-minor { background: #FF7452; color: #2a0e06; }
+.pill-trivial { background: #9B6BFF; color: #160a2e; }
+.pill-info { background: rgba(93, 187, 140, 0.18); color: var(--accent); }
+.report-hidden { border-color: rgba(155, 107, 255, 0.5); border-top-color: #9B6BFF; }
+.report-hidden .report-star { color: #B794FF; }
+.report-tool { border-top-color: var(--accent); }
+.report-tool .pill-resolved { color: var(--text); }
 .pill-resolved { background: rgba(93, 187, 140, 0.18); color: var(--accent); border: 1px solid var(--accent); }
 .report-star { margin-left: auto; color: #F2C14E; font-weight: 700; }
 .report-headline { margin: 14px 0 0; font-size: 26px; font-weight: 800; line-height: 1.2; color: #F2C14E; }

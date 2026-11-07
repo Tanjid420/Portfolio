@@ -6,8 +6,8 @@ import { SWING_TIME } from './Player'
 import { useGame } from './store'
 
 /** The net is on its way down between these points of the swing. */
-const NET_DOWN_FROM = 0.3
-const NET_DOWN_TO = 0.55
+export const NET_DOWN_FROM = 0.3
+export const NET_DOWN_TO = 0.55
 /** Length of the catch animation, in seconds. */
 const CATCH_TIME = 0.9
 
@@ -15,7 +15,7 @@ const SHELL: Record<BugKind, string> = { normal: '#FF7452', golden: '#F2C14E', b
 const SPOTS: Record<BugKind, string> = { normal: '#1A1A1A', golden: '#7A5410', boss: '#1A1A1A' }
 
 /** Distance from (x, z) to the line segment a-b on the ground. */
-function distToSegment(x: number, z: number, a: [number, number], b: [number, number]) {
+export function distToSegment(x: number, z: number, a: [number, number], b: [number, number]) {
   const [ax, az] = a
   const abx = b[0] - ax
   const abz = b[1] - az
@@ -24,7 +24,7 @@ function distToSegment(x: number, z: number, a: [number, number], b: [number, nu
   return Math.hypot(x - (ax + abx * t), z - (az + abz * t))
 }
 
-type Mats = ReturnType<typeof makeMats>
+export type Mats = ReturnType<typeof makeMats>
 
 function makeMats(kind: BugKind) {
   const m = (color: string, roughness = 0.6) => new MeshStandardMaterial({ color, roughness })
@@ -69,7 +69,7 @@ function Leg({ legRef, x, z, mats }: { legRef: (g: Group | null) => void; x: num
 }
 
 /** Cute ladybug facing +z. Golden bugs shine, the boss has horns and a tie. */
-function BugModel({ kind, mats, legs }: { kind: BugKind; mats: Mats; legs: RefObject<(Group | null)[]> }) {
+export function BugModel({ kind, mats, legs }: { kind: BugKind; mats: Mats; legs: RefObject<(Group | null)[]> }) {
   return (
     <>
       {/* Dark body underneath, shows as the line between the wings */}

@@ -2,9 +2,12 @@
 // Pure logic, no React, so it is easy to test.
 
 import { cv } from '../data/cv'
+import { funFacts } from '../data/funFacts'
 import { BUGS, zoneOf, type BugDef } from './bugs'
+import { HIDDEN_BUGS } from './hidden'
+import { GLASS_CARD_ID } from './store'
 
-export type Severity = 'Critical' | 'Major' | 'Minor'
+export type Severity = 'Critical' | 'Major' | 'Minor' | 'Trivial' | 'Info'
 
 export interface ReportRow {
   label: string
@@ -13,8 +16,12 @@ export interface ReportRow {
 
 export interface BugReport {
   id: string
-  kind: BugDef['kind']
+  kind: BugDef['kind'] | 'hidden' | 'tool'
   severity: Severity
+  /** Status pill, e.g. "✔ Resolved". */
+  status: string
+  /** Small label at the right of the header, e.g. "★ Golden bug". */
+  badge?: string
   title: string
   /** Big number line at the top of golden cards. */
   headline?: string
@@ -35,6 +42,8 @@ export function reportFor(def: BugDef): BugReport {
     id: def.id,
     kind: def.kind,
     severity: SEVERITY[def.kind],
+    status: '✔ Resolved',
+    badge: def.kind === 'golden' ? '★ Golden bug' : undefined,
     foundIn: `${zone.name} (${zone.section})`,
   }
   const c = def.content
@@ -90,7 +99,37 @@ export function reportFor(def: BugDef): BugReport {
   }
 }
 
+/** Card for picking up the magnifying glass. */
+const glassReport: BugReport = {
+  id: GLASS_CARD_ID,
+  kind: 'tool',
+  severity: 'Info',
+  status: '🔍 Unlocked',
+  title: 'New tool: magnifying glass',
+  foundIn: 'Welcome Zone (About Me)',
+  rows: [
+    { label: 'What it does', value: 'Hidden bugs show up when you walk close to them.' },
+    { label: 'How many', value: `${HIDDEN_BUGS.length} hidden bugs, off the main path.` },
+    { label: 'Coverage', value: "They don't count. Catch them for fun facts." },
+  ],
+}
+
 export function reportById(id: string): BugReport | null {
+  if (id === GLASS_CARD_ID) return glassReport
+  const hidden = HIDDEN_BUGS.findIndex((b) => b.id === id)
+  if (hidden >= 0) {
+    const fact = funFacts[HIDDEN_BUGS[hidden].factIndex]
+    return {
+      id,
+      kind: 'hidden',
+      severity: 'Trivial',
+      status: '✔ Resolved',
+      badge: `🔍 Hidden bug ${hidden + 1} / ${HIDDEN_BUGS.length}`,
+      title: fact.title,
+      foundIn: 'Off the beaten path',
+      rows: [{ label: 'Fun fact', value: fact.text }],
+    }
+  }
   const def = BUGS.find((b) => b.id === id)
   return def ? reportFor(def) : null
 }

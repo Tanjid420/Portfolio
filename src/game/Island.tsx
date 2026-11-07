@@ -17,10 +17,14 @@ import {
   SRGBColorSpace,
   Vector3,
 } from 'three'
+import { HIDDEN_BUGS } from './hidden'
 import {
+  BUILDINGS,
   coastRadius,
+  MAGNIFIER_SPOT,
   isOnIsland,
   MOUNTAINS,
+  NOTICE_BOARD,
   PATH_POINTS,
   seededRandom,
   setScatterObstacles,
@@ -231,10 +235,18 @@ function Mountains() {
 function useScatter(samples: Vector3[]) {
   return useMemo(() => {
     const rand = seededRandom(7298)
+    // Spots that need open ground around them: buildings, Welcome props and hidden bugs. [x, z, radius]
+    const keepClear: [number, number, number][] = [
+      ...BUILDINGS.map((b): [number, number, number] => [...b.position, b.radius + 1.5]),
+      [...NOTICE_BOARD, 1.5],
+      [...MAGNIFIER_SPOT, 1.5],
+      ...HIDDEN_BUGS.map((h): [number, number, number] => [...h.position, 2.5]),
+    ]
     const isClear = (x: number, z: number, gap: number) => {
       if (!isOnIsland(x, z, 2.5)) return false
       if (ZONES.some((zn) => Math.hypot(x - zn.position[0], z - zn.position[1]) < zn.radius + gap)) return false
       if (MOUNTAINS.some(([mx, mz, mr]) => Math.hypot(x - mx, z - mz) < mr + 0.8)) return false
+      if (keepClear.some(([cx, cz, cr]) => Math.hypot(x - cx, z - cz) < cr + gap * 0.5)) return false
       return samples.every((p) => Math.hypot(x - p.x, z - p.z) > 2.2 + gap * 0.3)
     }
 

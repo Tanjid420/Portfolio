@@ -46,6 +46,41 @@ export const MOUNTAINS: [number, number, number, number][] = [
   [27, -17, 3.5, 5],
 ]
 
+export interface Building {
+  zone: ZoneId
+  /** Center on the ground, as [x, z]. */
+  position: [number, number]
+  /** Solid footprint radius, for walking. */
+  radius: number
+  /** Turned so the door faces halfway between its zone and the camera, so the front stays in view. */
+  facing: number
+}
+
+// One building per zone, placed behind or beside it so the camera can still see the zone.
+const BUILDING_SPOTS: [ZoneId, number, number][] = [
+  ['office', -27, 5],
+  ['workshop', -11, -22.5],
+  ['testlab', 13, -22.5],
+  ['academy', 28, 4],
+]
+
+export const BUILDINGS: Building[] = BUILDING_SPOTS.map(([zone, x, z]) => {
+  const [zx, zz] = ZONES.find((zn) => zn.id === zone)!.position
+  return { zone, position: [x, z], radius: 3, facing: Math.atan2(zx - x, zz - z) / 2 }
+})
+
+/** Notice board in the Welcome Zone, facing the camera. */
+export const NOTICE_BOARD: [number, number] = [3, 18.6]
+/** Pedestal with the magnifying glass, next to where the player starts. */
+export const MAGNIFIER_SPOT: [number, number] = [-2.8, 19.2]
+
+/** Things the player and bugs can't walk through, besides trees, rocks and mountains: [x, z, radius]. */
+const PROP_OBSTACLES: [number, number, number][] = [
+  ...BUILDINGS.map((b): [number, number, number] => [...b.position, b.radius]),
+  [...NOTICE_BOARD, 0.9],
+  [...MAGNIFIER_SPOT, 0.45],
+]
+
 // Trees and rocks the player can't walk through, as [x, z, radius]. Filled by the island scatter.
 let scatterObstacles: [number, number, number][] = []
 export function setScatterObstacles(list: [number, number, number][]) {
@@ -56,7 +91,8 @@ export function setScatterObstacles(list: [number, number, number][]) {
 export function isWalkable(x: number, z: number, radius = 0.5): boolean {
   if (!isOnIsland(x, z, radius + 0.4)) return false
   if (MOUNTAINS.some(([mx, mz, mr]) => Math.hypot(x - mx, z - mz) < mr * 0.95 + radius)) return false
-  return scatterObstacles.every(([ox, oz, or]) => Math.hypot(x - ox, z - oz) >= or + radius)
+  const clear = ([ox, oz, or]: [number, number, number]) => Math.hypot(x - ox, z - oz) >= or + radius
+  return PROP_OBSTACLES.every(clear) && scatterObstacles.every(clear)
 }
 
 // Path control points: each zone plus a few bends so it winds a little.
