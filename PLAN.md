@@ -79,10 +79,11 @@ Total 8 bugs, about 2 minutes. Contact details live in the top bar, the Welcome 
 
 Each step is sized for one session. Tick it when done.
 
-- [ ] **0. Setup:** Vite + React + TypeScript, three.js, React Three Fiber, drei, zustand (game state), howler (sound), Playwright. GitHub Action deploys to Pages. Result: a spinning test cube live at `tanjid420.github.io/Portfolio`.
-- [ ] **1. CV content + CV page:** turn the CV into `src/data/cv.ts`. Build the plain CV page and the fixed top bar (View CV / Download CV). The site is useful to recruiters from this step on.
-- [ ] **2. The island:** low-poly ground, water, lighting, five zone spots, path in CV order, camera that follows from above.
+- [x] **0. Setup:** Vite + React + TypeScript, three.js, React Three Fiber, drei, zustand (game state), howler (sound), Playwright. GitHub Action deploys to Pages. Result: a spinning test cube live at `tanjid420.github.io/Portfolio`.
+- [x] **1. CV content + CV page:** turn the CV into `src/data/cv.ts`. Build the plain CV page and the fixed top bar (View CV / Download CV). The site is useful to recruiters from this step on.
+- [x] **2. The island:** low-poly ground, water, lighting, five zone spots, path in CV order, camera that follows from above.
 - [ ] **3. The player:** cute masked QA character with a net, walking, net swing, keyboard controls, island edges.
+  - Notes from step 2: layout lives in `src/game/world.ts` (`ZONES`, `PATH_POINTS`, `isOnIsland()` for the edges). The camera follows `useGame().focus` in `src/game/store.ts`; the player should set it. Remove the temporary zone buttons (`ZonePreview` in `Game.tsx`, `.zone-preview` in `index.css`). Grass was lifted to `#3A7550`.
 - [ ] **4. The bugs:** bug models, wander and flee behavior, catching with the net.
 - [ ] **5. Bug reports + HUD:** ticket-style cards filled from `cv.ts`, test coverage bar, minimap.
 - [ ] **6. Zone details:** buildings and props for each zone, boss bugs for jobs, hidden bugs and the magnifying glass.

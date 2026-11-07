@@ -1,32 +1,25 @@
-import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
-import type { Mesh } from 'three'
+import { lazy, Suspense } from 'react'
+import { TopBar } from './components/TopBar'
+import { CvPage } from './components/CvPage'
+import { useRoute } from './useRoute'
 
-// Step 0 placeholder: proves three.js renders and the deploy works.
-function SpinningCube() {
-  const ref = useRef<Mesh>(null)
-  useFrame((_, delta) => {
-    if (ref.current) {
-      ref.current.rotation.x += delta * 0.6
-      ref.current.rotation.y += delta * 0.9
-    }
-  })
-  return (
-    <mesh ref={ref}>
-      <boxGeometry args={[1.5, 1.5, 1.5]} />
-      <meshStandardMaterial color="#5DBB8C" />
-    </mesh>
-  )
-}
+// The 3D bundle loads only on the game screen, so the CV page stays fast.
+const Game = lazy(() => import('./game/Game'))
 
 export default function App() {
+  const route = useRoute()
   return (
-    <Canvas camera={{ position: [3, 3, 3] }} data-testid="scene">
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 5, 5]} intensity={1.5} />
-      <SpinningCube />
-      <OrbitControls />
-    </Canvas>
+    <>
+      <TopBar route={route} />
+      {route === 'cv' ? (
+        <CvPage />
+      ) : (
+        <div className="game" data-testid="game">
+          <Suspense fallback={<p className="game-loading">Loading the island…</p>}>
+            <Game />
+          </Suspense>
+        </div>
+      )}
+    </>
   )
 }
