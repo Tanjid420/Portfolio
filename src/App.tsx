@@ -21,7 +21,7 @@ export default function App() {
       ) : (
         <GameErrorBoundary>
           <div className="game" data-testid="game">
-            <Suspense fallback={<p className="game-loading">Loading the island…</p>}>
+            <Suspense fallback={<p className="game-loading">Loading the island… herding the bugs into place</p>}>
               <Game />
             </Suspense>
           </div>

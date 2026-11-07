@@ -107,7 +107,11 @@ export function BugReportCard() {
             aria-disabled={!ready}
             data-testid="bug-report-close"
           >
-            {waiting > 0 ? `Next report (${waiting} more)` : 'Got it, keep hunting'}
+            {waiting > 0
+              ? `Next report (${waiting} more)`
+              : caught === BUGS.length
+                ? 'See test results'
+                : 'Got it, keep hunting'}
           </button>
         </footer>
       </article>

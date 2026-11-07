@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide, Group, MeshStandardMaterial, Vector3 } from 'three'
 import { touch } from './input'
-import { PLAYER_START, useGame } from './store'
+import { isPaused, PLAYER_START, useGame } from './store'
 import { isWalkable } from './world'
 
 const SPEED = 7 // units per second
@@ -250,8 +250,8 @@ export function Player() {
     const m = motion.current
     const keys = held.current
     const state = useGame.getState()
-    // The hero waits while a bug report is open.
-    const paused = state.cardQueue.length > 0
+    // The hero waits before Start and while a card, the board or the ending is open.
+    const paused = isPaused(state)
     if (touch.swing) {
       touch.swing = false
       swingRequested.current = true

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { BUGS } from './bugs'
 import { ZONES } from './world'
 
 const [startX, startZ] = ZONES[0].position
@@ -29,6 +30,17 @@ interface GameState {
   /** IDs of the hidden bugs found so far. They don't count toward coverage. */
   found: string[]
   findHidden: (id: string) => void
+  /** False until the player presses Start. */
+  started: boolean
+  /** performance.now() when Start was pressed. Used for the finish time. */
+  startedAt: number
+  start: () => void
+  /** The Welcome board (summary + contact) is open. */
+  boardOpen: boolean
+  setBoardOpen: (open: boolean) => void
+  /** The player closed the "All tests passed" screen to keep exploring. */
+  endDismissed: boolean
+  dismissEnd: () => void
 }
 
 /** Card ID for the "you picked up the magnifying glass" card. */
@@ -70,7 +82,24 @@ export const useGame = create<GameState>((set) => ({
   pickUpGlass: () => set((s) => (s.hasGlass ? s : { hasGlass: true, ...enqueue(s, GLASS_CARD_ID) })),
   found: [],
   findHidden: (id) => set((s) => (s.found.includes(id) ? s : { found: [...s.found, id], ...enqueue(s, id) })),
+  started: false,
+  startedAt: 0,
+  // The Welcome board opens right away, so the summary is the first thing people read.
+  start: () => set((s) => (s.started ? s : { started: true, startedAt: performance.now(), boardOpen: true })),
+  boardOpen: false,
+  setBoardOpen: (boardOpen) => set({ boardOpen }),
+  endDismissed: false,
+  dismissEnd: () => set({ endDismissed: true }),
 }))
+
+/** All main bugs are caught. */
+export const allCaught = (s: GameState) => s.caught.length >= BUGS.length
+
+/** The ending screen is up: everything caught, every card read, not closed yet. */
+export const showingEnd = (s: GameState) => allCaught(s) && s.cardQueue.length === 0 && !s.endDismissed
+
+/** The hero can't move or swing: before Start, or while a card, the board or the ending is open. */
+export const isPaused = (s: GameState) => !s.started || s.boardOpen || s.cardQueue.length > 0 || showingEnd(s)
 
 // Lets local checks and tests read the game state from the browser console.
 if (import.meta.env.DEV) (window as unknown as { __game: typeof useGame }).__game = useGame

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerformanceMonitor } from '@react-three/drei'
+import { BoardPrompt } from './BoardPrompt'
 import { Bugs } from './Bugs'
 import { BugReportCard } from './BugReportCard'
 import { Buildings } from './Buildings'
@@ -10,6 +11,7 @@ import { HiddenBugs } from './HiddenBugs'
 import { CoverageBar, Minimap } from './Hud'
 import { Island } from './Island'
 import { Player } from './Player'
+import { EndScreen, StartScreen, WelcomeBoard } from './Screens'
 import { useGameAudio } from './sound'
 import { TouchControls } from './TouchControls'
 
@@ -52,6 +54,7 @@ export default function Game() {
         <Buildings />
         <HiddenBugs />
         <Player />
+        <BoardPrompt />
         <Bugs />
         <CameraRig />
       </Canvas>
@@ -59,6 +62,9 @@ export default function Game() {
       <Minimap />
       {isTouch ? <TouchControls /> : null}
       <BugReportCard />
+      <WelcomeBoard />
+      <StartScreen />
+      <EndScreen />
     </>
   )
 }

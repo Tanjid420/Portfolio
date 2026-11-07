@@ -6,7 +6,7 @@ import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three'
 import { BugModel, distToSegment, NET_DOWN_FROM, NET_DOWN_TO, type Mats } from './Bugs'
 import { HIDDEN_BUGS, REVEAL_DISTANCE, type HiddenBugDef } from './hidden'
 import { SWING_TIME } from './Player'
-import { useGame } from './store'
+import { isPaused, useGame } from './store'
 import { MAGNIFIER_SPOT } from './world'
 
 const PURPLE = '#9B6BFF'
@@ -31,7 +31,7 @@ export function Magnifier() {
     g.rotation.y = t * 1.5
     g.position.y = 1.55 + Math.sin(t * 2.2) * 0.12
     const [px, pz] = state.focus
-    if (Math.hypot(px - x, pz - z) < PICKUP_DISTANCE && state.cardQueue.length === 0) state.pickUpGlass()
+    if (Math.hypot(px - x, pz - z) < PICKUP_DISTANCE && !isPaused(state)) state.pickUpGlass()
   })
 
   return (

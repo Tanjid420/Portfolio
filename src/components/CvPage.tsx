@@ -1,34 +1,17 @@
 import type { ReactNode } from 'react'
 import { cv, cvPdfUrl } from '../data/cv'
+import { ContactList } from './ContactList'
 
 // Plain, fast CV page. Also the fallback when the 3D game can't load.
 export function CvPage({ notice }: { notice?: ReactNode }) {
-  const { contact, job, education } = cv
+  const { job, education } = cv
   return (
     <main className="cv" data-testid="cv-page">
       {notice}
       <section className="cv-head">
         <h1>{cv.name}</h1>
         <p className="cv-title">{cv.title}</p>
-        <ul className="cv-contact">
-          <li>
-            <a href={`mailto:${contact.email}`}>{contact.email}</a>
-          </li>
-          <li>
-            <a href={`tel:${contact.phone.replace(/\s/g, '')}`}>{contact.phone}</a>
-          </li>
-          <li>{contact.location}</li>
-          <li>
-            <a href={`https://${contact.github}`} target="_blank" rel="noreferrer">
-              {contact.github}
-            </a>
-          </li>
-          <li>
-            <a href={`https://${contact.linkedin}`} target="_blank" rel="noreferrer">
-              {contact.linkedin}
-            </a>
-          </li>
-        </ul>
+        <ContactList />
       </section>
 
       <section aria-labelledby="about">

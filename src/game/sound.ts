@@ -124,6 +124,13 @@ export const sfx = {
       tone(freq(79), t, 0.2, { type: 'sine', vol: 0.25 })
       tone(freq(86), t + 0.12, 0.35, { type: 'sine', vol: 0.25 })
     }),
+  // "All tests passed": a little fanfare.
+  finale: () =>
+    play((t) => {
+      ;[67, 72, 76, 79].forEach((m, i) => tone(freq(m), t + i * 0.12, 0.3, { vol: 0.2 }))
+      ;[72, 76, 79, 84].forEach((m) => tone(freq(m), t + 0.5, 1.2, { vol: 0.12, attack: 0.04 }))
+      ;[96, 100, 103, 108].forEach((m, i) => tone(freq(m), t + 0.55 + i * 0.07, 0.5, { type: 'sine', vol: 0.06 }))
+    }),
   card: () =>
     play((t) => {
       hiss(t, 0.12, 3000, 1500, 0.12)

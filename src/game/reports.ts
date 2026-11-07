@@ -108,9 +108,9 @@ const glassReport: BugReport = {
   title: 'New tool: magnifying glass',
   foundIn: 'Welcome Zone (About Me)',
   rows: [
-    { label: 'What it does', value: 'Hidden bugs show up when you walk close to them.' },
+    { label: 'What it does', value: 'Hidden bugs show up when you walk close to them. Every QA needs one.' },
     { label: 'How many', value: `${HIDDEN_BUGS.length} hidden bugs, off the main path.` },
-    { label: 'Coverage', value: "They don't count. Catch them for fun facts." },
+    { label: 'Coverage', value: "They don't count toward coverage. Catch them anyway for fun facts." },
   ],
 }
 
