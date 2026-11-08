@@ -159,7 +159,17 @@ export const cv = {
       groups: [
         {
           label: 'Testing Types',
-          items: ['Exploratory', 'Regression', 'Smoke', 'E2E', 'Integration', 'Functional', 'Usability', 'Sanity', 'Test Case Design & Execution'],
+          items: [
+            'Exploratory',
+            'Regression',
+            'Smoke',
+            'E2E',
+            'Integration',
+            'Functional',
+            'Usability',
+            'Sanity',
+            'Test Case Design & Execution',
+          ],
         },
         { label: 'Platforms', items: ['Web (React SaaS, B2B)', 'Mobile (iOS & Android)'] },
         { label: 'Methodology', items: ['Agile'] },
@@ -188,3 +198,7 @@ export const cv = {
 }
 
 export const cvPdfUrl = `${import.meta.env.BASE_URL}Tangid_Khan_CV.pdf`
+
+/** The public repo and its tester guide ("Test this site"). */
+export const repoUrl = 'https://github.com/Tanjid420/Portfolio'
+export const testingGuideUrl = `${repoUrl}/blob/main/TESTING.md`

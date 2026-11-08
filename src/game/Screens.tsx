@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ContactList } from '../components/ContactList'
+import { TestThisSite } from '../components/TestThisSite'
 import { HowToPlayList } from '../components/HowToPlay'
 import { cv, cvPdfUrl } from '../data/cv'
 import { BUGS } from './bugs'
@@ -274,6 +275,7 @@ export function EndScreen() {
             {complete ? 'Play again ↻' : 'Play again'}
           </button>
         </div>
+        <TestThisSite />
       </section>
     </div>
   )

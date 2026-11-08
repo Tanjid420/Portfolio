@@ -3,6 +3,7 @@ import { BUGS } from '../game/bugs'
 import { isTouch } from '../game/device'
 import { HIDDEN_BUGS } from '../game/hidden'
 import { useHelp } from '../helpState'
+import { TestThisSite } from './TestThisSite'
 
 /** The rules in short, bold bullet points. Used on the start screen and in the "How to play" panel. */
 export function HowToPlayList() {
@@ -82,6 +83,7 @@ export function HowToPlayPanel() {
           How to play
         </h2>
         <HowToPlayList />
+        <TestThisSite />
         <div className="screen-actions">
           <button
             ref={button}

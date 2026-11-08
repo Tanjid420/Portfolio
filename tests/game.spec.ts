@@ -116,6 +116,7 @@ test.describe('playing', () => {
     await expect(end.getByRole('heading', { name: 'All tests passed ✅' })).toBeVisible()
     await expect(end).toContainText('100%')
     await expect(end.getByTestId('contact')).toBeVisible()
+    await expect(end.getByTestId('test-this-site')).toHaveAttribute('href', /TESTING\.md$/)
     await expect(page.getByTestId('top-bar').getByTestId('download-cv')).toBeVisible()
 
     await closeWith(end.getByTestId('keep-exploring'))
@@ -173,6 +174,7 @@ test.describe('top bar on the game screen', () => {
     await page.getByTestId('how-to-play-button').click()
     const panel = page.getByTestId('help-panel')
     await expect(panel.getByRole('heading', { name: 'How to play' })).toBeVisible()
+    await expect(panel.getByTestId('test-this-site')).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(panel).toBeHidden()
   })

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { cv, cvPdfUrl } from '../data/cv'
 import { ContactList } from './ContactList'
+import { TestThisSite } from './TestThisSite'
 
 // Plain, fast CV page. Also the fallback when the 3D game can't load.
 export function CvPage({ notice }: { notice?: ReactNode }) {
@@ -80,6 +81,7 @@ export function CvPage({ notice }: { notice?: ReactNode }) {
           Download CV (PDF)
         </a>
       </p>
+      <TestThisSite />
     </main>
   )
 }

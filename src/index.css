@@ -510,3 +510,7 @@ a { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   .board-prompt { animation: none; }
 }
+
+/* "Test this site" invite for other testers */
+.test-site { margin: 14px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
+.cv .test-site { text-align: left; }

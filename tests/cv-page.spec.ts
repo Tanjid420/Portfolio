@@ -30,3 +30,11 @@ test('Download CV downloads the PDF', async ({ page }) => {
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('download-cv').click()])
   expect(download.suggestedFilename()).toBe('Tangid_Khan_CV.pdf')
 })
+
+test('"Test this site" links to the testing guide', async ({ page }) => {
+  await page.goto('./#/cv')
+  const link = page.getByTestId('cv-page').getByTestId('test-this-site')
+  await expect(link).toBeVisible()
+  await expect(link).toHaveAttribute('href', /github\.com\/Tanjid420\/Portfolio\/blob\/main\/TESTING\.md$/)
+  await expect(link).toHaveAttribute('target', '_blank')
+})
