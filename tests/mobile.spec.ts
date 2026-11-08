@@ -41,3 +41,12 @@ test('dragging the joystick walks the hero', async ({ page }) => {
   await expect.poll(() => page.evaluate(() => window.__game.getState().focus[0])).toBeGreaterThan(x0 + 1)
   await page.mouse.up()
 })
+
+test('the Welcome board fits the screen without scrolling', async ({ page }) => {
+  await openGame(page)
+  await page.getByTestId('start').click()
+  const board = page.getByTestId('welcome-board')
+  await expect(board).toBeVisible()
+  await expect(board.getByTestId('welcome-board-close')).toBeInViewport({ ratio: 1 })
+  expect(await board.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1)
+})

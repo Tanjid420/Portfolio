@@ -35,7 +35,7 @@ When something fails there, download the `playwright-report` artifact: it has sc
 | `tests/smoke.spec.ts` | The page loads, the 3D canvas draws, the CV PDF is served |
 | `tests/cv-page.spec.ts` | Top bar buttons, the CV page and all its sections, Download CV |
 | `tests/game.spec.ts` | Start screen, Welcome board, walking, a real net-swing catch, report cards, the card queue, the "All tests passed" ending, Play again, mute, How to play, leaving for the CV and coming back |
-| `tests/mobile.spec.ts` | Phone layout (no sideways scroll, CV buttons on screen), joystick and Swing button |
+| `tests/mobile.spec.ts` | Phone layout (no sideways scroll, CV buttons on screen, Welcome board fits without scrolling), joystick and Swing button |
 | `tests/fallback.spec.ts` | Without WebGL, the CV page shows instead of the game |
 
 Every test also fails if the page throws an uncaught error.
