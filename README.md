@@ -47,8 +47,12 @@ npm run preview    # serve the build at http://localhost:4173/Portfolio/
 
 ## Built with
 
-React, TypeScript and Vite · three.js with React Three Fiber and drei · zustand for game state · Web Audio API for
-all sounds (made in code, no audio files) · Playwright for tests · GitHub Actions and GitHub Pages.
+- **App:** React, TypeScript and Vite
+- **3D:** three.js with React Three Fiber and drei
+- **Game state:** zustand
+- **Sound:** Web Audio API (all sounds made in code, no audio files)
+- **Testing:** Playwright
+- **CI and hosting:** GitHub Actions and GitHub Pages
 
 ## Project layout
 
