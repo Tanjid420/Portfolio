@@ -3,7 +3,7 @@
 **Live site: https://tanjid420.github.io/Portfolio/**
 
 I'm Md. Tangid Khan, a Software QA Engineer (manual testing, Playwright automation, CI/CD). My portfolio is a
-tiny 3D game: you're a masked QA engineer with a bug net on a low-poly island. Catch the 8 bugs and each one opens a
+tiny 3D game: you're a QA engineer with a bug net on a bug island. Catch the 8 bugs and each one opens a
 bug report with a part of my CV. The whole run takes about 2 minutes.
 
 In a hurry? The top bar always has **View CV** and **Download CV**, on every screen.
