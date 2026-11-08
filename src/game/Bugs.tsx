@@ -11,6 +11,16 @@ import { useGame } from './store'
 /** The net is on its way down between these points of the swing. */
 export const NET_DOWN_FROM = 0.3
 export const NET_DOWN_TO = 0.55
+
+/**
+ * True if the net came down at any point since the last frame. Checking only "now" would miss the
+ * short down window on slow devices, where one frame can jump right over it.
+ */
+export function netCameDown(now: number, frameTime: number, swingStartedAt: number) {
+  const from = swingStartedAt + NET_DOWN_FROM * SWING_TIME
+  const to = swingStartedAt + NET_DOWN_TO * SWING_TIME
+  return now >= from && now - frameTime <= to
+}
 /** Length of the catch animation, in seconds. */
 const CATCH_TIME = 0.9
 
@@ -238,8 +248,7 @@ function Bug({ def }: { def: BugDef }) {
     stepBug(m, def, state.focus, dt)
 
     // Caught when the net comes down close enough, anywhere between the hero and the ring.
-    const p = (now - state.swingStartedAt) / SWING_TIME
-    if (p >= NET_DOWN_FROM && p <= NET_DOWN_TO) {
+    if (netCameDown(now, rawDelta, state.swingStartedAt)) {
       if (distToSegment(m.x, m.z, state.focus, state.netPos) < spec.catchRadius) {
         caughtAt.current = now
         state.catchBug(def.id)

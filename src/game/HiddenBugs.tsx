@@ -3,9 +3,8 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three'
-import { BugModel, distToSegment, NET_DOWN_FROM, NET_DOWN_TO, type Mats } from './Bugs'
+import { BugModel, distToSegment, netCameDown, type Mats } from './Bugs'
 import { HIDDEN_BUGS, REVEAL_DISTANCE, type HiddenBugDef } from './hidden'
-import { SWING_TIME } from './Player'
 import { isPaused, useGame } from './store'
 import { MAGNIFIER_SPOT } from './world'
 
@@ -134,8 +133,7 @@ function HiddenBug({ def }: { def: HiddenBugDef }) {
     })
 
     // Same catch rule as the main bugs: the net coming down anywhere between the hero and the ring.
-    const p = (now - state.swingStartedAt) / SWING_TIME
-    if (reveal.current > 0.5 && p >= NET_DOWN_FROM && p <= NET_DOWN_TO) {
+    if (reveal.current > 0.5 && netCameDown(now, rawDelta, state.swingStartedAt)) {
       if (distToSegment(x, z, state.focus, state.netPos) < CATCH_RADIUS) {
         caughtAt.current = now
         state.findHidden(def.id)

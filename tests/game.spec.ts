@@ -104,6 +104,8 @@ test.describe('playing', () => {
   })
 
   test('catching all 8 bugs shows "All tests passed"', async ({ page }) => {
+    // Eight cards to read: give slow machines (like CI runners) extra time.
+    test.slow()
     await startGame(page)
     for (const id of BUG_IDS) await fakeCatch(page, id)
     for (const id of BUG_IDS.slice(0, -1)) await readCard(page, id)
@@ -121,6 +123,8 @@ test.describe('playing', () => {
   })
 
   test('Play again starts a fresh game', async ({ page }) => {
+    // Eight cards to read: give slow machines (like CI runners) extra time.
+    test.slow()
     await startGame(page)
     for (const id of BUG_IDS) await fakeCatch(page, id)
     for (const id of BUG_IDS) await readCard(page, id)
