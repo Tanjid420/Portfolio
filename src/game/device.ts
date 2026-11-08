@@ -29,3 +29,9 @@ export function hasWebGL(): boolean {
     return false
   }
 }
+
+/**
+ * Exposes `window.__game` (store) and `window.__bugs` (bug positions) for tests and console checks.
+ * Always on in dev; add ?test=1 to turn it on in the built site.
+ */
+export const testHooks = import.meta.env.DEV || params.get('test') === '1'

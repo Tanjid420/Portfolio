@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './support'
 
 test('page loads and draws the 3D canvas', async ({ page }) => {
   await page.goto('./')

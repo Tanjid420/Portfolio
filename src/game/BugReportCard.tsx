@@ -16,22 +16,25 @@ export function BugReportCard() {
   const caught = useGame((s) => s.caught.length)
   const openedAt = useGame((s) => s.cardOpenedAt)
   const closeCard = useGame((s) => s.closeCard)
-  // Only used to re-render when the card appears and when it becomes closable.
-  const [, setTick] = useState(0)
+  // The open time of the card that is showing / closable. Set by the timers below, because a timer
+  // can fire a hair before the elapsed-time check would pass, and then nothing would re-render.
+  const [shownFor, setShownFor] = useState(-1)
+  const [readyFor, setReadyFor] = useState(-1)
   const button = useRef<HTMLButtonElement>(null)
 
   // Timing comes from the open time in the store, never from leftover component state.
   const elapsed = id ? performance.now() - openedAt : 0
-  const shown = !!id && elapsed >= CARD_SHOW_DELAY_MS
-  const ready = !!id && elapsed >= READY_AFTER_MS
+  const shown = !!id && (shownFor === openedAt || elapsed >= CARD_SHOW_DELAY_MS)
+  const ready = !!id && (readyFor === openedAt || elapsed >= READY_AFTER_MS)
 
   // Show the card after the catch animation, then focus the button so Space or Enter closes it.
   useEffect(() => {
     if (!id) return
     const left = (ms: number) => Math.max(0, ms - (performance.now() - openedAt))
-    const show = setTimeout(() => setTick((n) => n + 1), left(CARD_SHOW_DELAY_MS))
+    const show = setTimeout(() => setShownFor(openedAt), left(CARD_SHOW_DELAY_MS))
     const focus = setTimeout(() => {
-      setTick((n) => n + 1)
+      setShownFor(openedAt)
+      setReadyFor(openedAt)
       button.current?.focus()
     }, left(READY_AFTER_MS))
     return () => {

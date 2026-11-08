@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { useHelp } from '../helpState'
 import { BUGS } from './bugs'
+import { testHooks } from './device'
 import { HIDDEN_BUGS } from './hidden'
 import { ZONES } from './world'
 
@@ -110,5 +111,5 @@ export const showingEnd = (s: GameState) => allCaught(s) && s.cardQueue.length =
 export const isPaused = (s: GameState) =>
   !s.started || s.boardOpen || s.cardQueue.length > 0 || showingEnd(s) || useHelp.getState().open
 
-// Lets local checks and tests read the game state from the browser console.
-if (import.meta.env.DEV) (window as unknown as { __game: typeof useGame }).__game = useGame
+// Lets local checks and tests read the game state from the browser console (dev, or ?test=1).
+if (testHooks) (window as unknown as { __game: typeof useGame }).__game = useGame

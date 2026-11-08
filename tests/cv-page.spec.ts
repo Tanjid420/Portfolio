@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './support'
 
 test('top bar shows View CV and Download CV on the game screen', async ({ page }) => {
   await page.goto('./')
@@ -27,9 +27,6 @@ test('CV page link works directly', async ({ page }) => {
 
 test('Download CV downloads the PDF', async ({ page }) => {
   await page.goto('./#/cv')
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    page.getByTestId('download-cv').click(),
-  ])
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('download-cv').click()])
   expect(download.suggestedFilename()).toBe('Tangid_Khan_CV.pdf')
 })
