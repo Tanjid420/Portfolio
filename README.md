@@ -18,7 +18,7 @@ In a hurry? The top bar always has **View CV** and **Download CV**, on every scr
 | Mute | M or 🔊 | 🔊 |
 
 - **8 bugs** carry the CV: 1 boss bug (experience), 4 golden bugs (contributions), 2 skill bugs, 1 education bug.
-- **3 hidden bugs** show up once you pick up the magnifying glass by the start. They hold fun facts.
+- **8 hidden bugs** show up once you pick up the magnifying glass by the start. They hold fun facts.
 - At 8 / 8 you get the "All tests passed ✅" screen.
 
 If the device can't run 3D, the site shows the plain CV page instead.
