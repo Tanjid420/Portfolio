@@ -14,11 +14,11 @@ export function CoverageBar() {
   return (
     <div className="hud-coverage" data-testid="coverage">
       <div className="hud-coverage-text">
-        Test coverage:{' '}
-        <strong>
+        🐞 Test coverage: {/* A new key on each catch restarts the pop animation. */}
+        <strong key={caught} className={caught ? 'hud-pop' : undefined}>
           {caught} / {total}
         </strong>
-        <span className="hide-sm"> bugs caught</span> · {pct}%
+        <span className="hide-sm"> bugs caught</span> · <strong>{pct}%</strong>
       </div>
       <div
         className="hud-coverage-bar"

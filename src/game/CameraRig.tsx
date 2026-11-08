@@ -15,6 +15,13 @@ export function CameraRig() {
   const camera = useThree((s) => s.camera)
   const aspect = useThree((s) => s.size.width / s.size.height)
 
+  // Start right over the hero (who may be mid-game after a trip to the CV page), not at the default spot.
+  useEffect(() => {
+    const [x, z] = useGame.getState().focus
+    camera.position.set(x, 0, z).add(OFFSET)
+    camera.lookAt(x, 0, z)
+  }, [camera])
+
   // On portrait screens, open the view up so you can see about as far sideways as on a square screen.
   useEffect(() => {
     if (!(camera instanceof PerspectiveCamera)) return

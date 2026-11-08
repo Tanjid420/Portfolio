@@ -27,6 +27,8 @@ export interface ContributionGroup {
   name: string
   headline: string
   items: [Contribution, Contribution]
+  /** Which item the bug card shows first, when it differs from the CV order. */
+  cardFirst?: 0 | 1
 }
 
 export interface SkillGroup {
@@ -52,6 +54,8 @@ export interface Education {
 export const cv = {
   name: 'Md. Tangid Khan',
   shortName: 'Tangid Khan',
+  /** Name in the top bar. */
+  navName: 'Md Tangid Khan',
   title: 'QA Engineer · Web & Mobile · Manual Testing & Automation',
   contact: {
     email: 'tangidkhan67@gmail.com',
@@ -131,7 +135,9 @@ export const cv = {
     {
       id: 'leveling-up',
       name: 'Leveling up',
-      headline: '2 junior engineers mentored',
+      headline: 'Self-taught Playwright, running in CI/CD',
+      // The card leads with the automation work (item 1); the CV page and PDF keep their order.
+      cardFirst: 1,
       items: [
         {
           title: 'Mentored 2 junior engineers',
@@ -156,7 +162,7 @@ export const cv = {
           items: ['Exploratory', 'Regression', 'Smoke', 'E2E', 'Integration', 'Functional', 'Usability', 'Sanity', 'Test Case Design & Execution'],
         },
         { label: 'Platforms', items: ['Web (React SaaS, B2B)', 'Mobile (iOS & Android)'] },
-        { label: 'Methodology', items: ['Agile', 'SDLC', 'STLC', 'Defect Life Cycle'] },
+        { label: 'Methodology', items: ['Agile'] },
         { label: 'Debugging Tools', items: ['Browser DevTools'] },
       ],
     },

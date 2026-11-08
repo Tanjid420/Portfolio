@@ -1,9 +1,9 @@
-import { useMemo, useRef, type RefObject } from 'react'
+import { useMemo, useRef, useState, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, SphereGeometry } from 'three'
 import { animateBoss, BossModel, type BossParts } from './BossBug'
 import { Kit, rod } from './kit'
-import { BUG_SPECS, BUGS, startMotion, stepBug, zoneOf, type BugDef, type BugKind } from './bugs'
+import { BUG_SPECS, BUGS, startMotion, stepBug, zoneOf, type BugDef, type BugKind, type BugMotion } from './bugs'
 import { SWING_TIME } from './Player'
 import { useGame } from './store'
 
@@ -152,6 +152,12 @@ export function BugModel({ kind, mats, legs }: { kind: BugKind; mats: Mats; legs
 
 const SPARKS = 12
 
+/**
+ * Where each bug is, kept outside React so it survives the scene being rebuilt
+ * (going to the CV page and back): bugs carry on from where they were.
+ */
+const motions = new Map<string, BugMotion>()
+
 const debugBugs: Record<string, unknown> = {}
 if (import.meta.env.DEV) (window as unknown as { __bugs: typeof debugBugs }).__bugs = debugBugs
 
@@ -168,9 +174,12 @@ function Bug({ def }: { def: BugDef }) {
   const boss = useRef<BossParts>({ cases: [], wings: [] })
   /** Boss only: how far its wings are open, 0..1. */
   const wingsOpen = useRef(0)
-  const motion = useRef(startMotion(def))
+  const motion = useRef(motions.get(def.id) ?? startMotion(def))
+  motions.set(def.id, motion.current)
   const caughtAt = useRef<number | null>(null)
-  const done = useRef(useGame.getState().caught.includes(def.id))
+  /** Caught before this scene was built (e.g. before a trip to the CV page): never drawn again. */
+  const [caughtBefore] = useState(() => useGame.getState().caught.includes(def.id))
+  const done = useRef(caughtBefore)
   // Dev only: lets local checks and tests see where each bug is.
   if (import.meta.env.DEV) debugBugs[def.id] = motion.current
 
@@ -266,6 +275,7 @@ function Bug({ def }: { def: BugDef }) {
     }
   })
 
+  if (caughtBefore) return null
   return (
     <group ref={root} scale={spec.scale}>
       {/* Soft round shadow */}

@@ -44,7 +44,7 @@ export function reportFor(def: BugDef): BugReport {
     severity: SEVERITY[def.kind],
     status: '✔ Resolved',
     badge: def.kind === 'golden' ? '★ Golden bug' : undefined,
-    foundIn: `${zone.name} (${zone.section})`,
+    foundIn: `${zone.section} (${zone.name})`,
   }
   const c = def.content
 
@@ -68,7 +68,7 @@ export function reportFor(def: BugDef): BugReport {
       ...base,
       title: group.name,
       headline: group.headline,
-      rows: group.items.map((item) => ({
+      rows: (group.cardFirst ? [...group.items].reverse() : group.items).map((item) => ({
         label: item.title,
         value: item.detail,
       })),
@@ -106,7 +106,7 @@ const glassReport: BugReport = {
   severity: 'Info',
   status: '🔍 Unlocked',
   title: 'New tool: magnifying glass',
-  foundIn: 'Welcome Zone (About Me)',
+  foundIn: 'About Me (Welcome Zone)',
   rows: [
     { label: 'What it does', value: 'Hidden bugs show up when you walk close to them. Every QA needs one.' },
     { label: 'How many', value: `${HIDDEN_BUGS.length} hidden bugs, off the main path.` },
@@ -124,7 +124,6 @@ export function reportById(id: string): BugReport | null {
       kind: 'hidden',
       severity: 'Trivial',
       status: '✔ Resolved',
-      badge: `🔍 Hidden bug ${hidden + 1} / ${HIDDEN_BUGS.length}`,
       title: fact.title,
       foundIn: 'Off the beaten path',
       rows: [{ label: 'Fun fact', value: fact.text }],

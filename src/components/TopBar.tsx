@@ -1,22 +1,37 @@
 import { cv, cvPdfUrl } from '../data/cv'
+import { useGame } from '../game/store'
+import { useHelp } from '../helpState'
 import { useSoundSettings } from '../soundSettings'
 import type { Route } from '../useRoute'
 
 // Always visible, on every screen, so recruiters can reach the CV in one click.
 export function TopBar({ route }: { route: Route }) {
+  // A game is under way: the CV page offers to go back to it rather than start one.
+  const inGame = useGame((s) => s.started)
   return (
     <header className="topbar" data-testid="top-bar">
       <a className="topbar-name" href="#/">
-        🐞 {cv.shortName}
+        🐞 {cv.navName}
         <span className="topbar-role">QA Engineer</span>
       </a>
       <nav className="topbar-actions">
         {route === 'cv' ? (
-          <a className="btn btn-ghost" href="#/">
-            Play<span className="hide-sm"> the game</span>
+          <a className="btn btn-ghost" href="#/" data-testid="play-game">
+            {inGame ? (
+              <>
+                Back<span className="hide-sm"> to the game</span>
+              </>
+            ) : (
+              <>
+                Play<span className="hide-sm"> the game</span>
+              </>
+            )}
           </a>
         ) : (
-          <MuteButton />
+          <>
+            <MuteButton />
+            <HelpButton />
+          </>
         )}
         <a
           className="btn btn-ghost"
@@ -53,6 +68,27 @@ function MuteButton() {
       data-testid="mute"
     >
       {muted ? '🔇' : '🔊'}
+    </button>
+  )
+}
+
+// Only on the game screen: opens the "How to play" panel.
+function HelpButton() {
+  const setOpen = useHelp((s) => s.setOpen)
+  return (
+    <button
+      type="button"
+      className="btn btn-ghost btn-icon"
+      // Drop focus after the click, so Space swings the net instead of reopening the panel.
+      onClick={(e) => {
+        e.currentTarget.blur()
+        setOpen(true)
+      }}
+      aria-label="How to play"
+      title="How to play"
+      data-testid="how-to-play-button"
+    >
+      ❓<span className="hide-sm"> How to play</span>
     </button>
   )
 }

@@ -1,21 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ContactList } from '../components/ContactList'
+import { HowToPlayList } from '../components/HowToPlay'
 import { cv, cvPdfUrl } from '../data/cv'
 import { BUGS } from './bugs'
 import { isTouch } from './device'
 import { HIDDEN_BUGS } from './hidden'
 import { sfx } from './sound'
-import { isPaused, showingEnd, useGame } from './store'
+import { allDone, isPaused, showingEnd, useGame } from './store'
 import { NOTICE_BOARD } from './world'
 
 /** Screens ignore closing for a moment after opening, so a held or mashed key doesn't skip them. */
 const READY_AFTER_MS = 500
 /** Within this distance of the notice board, a "Press E" prompt shows. */
 const BOARD_READ_DISTANCE = 3
-
-const CONTROLS = isTouch
-  ? 'Joystick to walk · Swing button to catch'
-  : 'WASD or arrows to walk · Space to swing the net · M to mute'
 
 /**
  * Focuses the main button once the screen is ready. `isReady()` reads a ref, so key listeners
@@ -52,13 +49,12 @@ export function StartScreen() {
           Catch the bugs, read the reports.
         </h1>
         <p className="screen-text">
-          {BUGS.length} bugs escaped onto {cv.shortName.split(' ')[0]}'s island. Each one carries a piece of the CV.
-          About 2 minutes. No bugs are harmed.
+          {BUGS.length} bugs escaped onto {cv.shortName.split(' ')[0]}'s island. About 2 minutes. No bugs are harmed.
         </p>
-        <p className="screen-controls">{CONTROLS}</p>
+        <HowToPlayList />
         <div className="screen-actions">
           <button className="btn btn-primary btn-big" onClick={start} autoFocus data-testid="start">
-            Start testing ▶
+            Start Hunting ▶
           </button>
           <a className="btn btn-ghost" href="#/cv">
             In a hurry? Read the CV
@@ -118,7 +114,7 @@ export function WelcomeBoard() {
       >
         <header className="report-head">
           <span className="report-id">README.md</span>
-          <span className="pill pill-info">📌 Welcome Zone (About Me)</span>
+          <span className="pill pill-info">📌 About Me (Welcome Zone)</span>
         </header>
         <h2 id="board-title" className="report-title">
           Hi, I'm {cv.shortName} 👋
@@ -195,6 +191,8 @@ function formatTime(ms: number) {
 // "All tests passed ✅" with confetti and contact details, once the last card is closed.
 export function EndScreen() {
   const ending = useGame(showingEnd)
+  // Everything found: the only way on is to play again from the start.
+  const complete = useGame(allDone)
   const hasGlass = useGame((s) => s.hasGlass)
   const found = useGame((s) => s.found.length)
   const time = useGame((s) => (s.lastCatch ? s.lastCatch.at - s.startedAt : 0))
@@ -204,7 +202,7 @@ export function EndScreen() {
     if (!ending) return setShown(false)
     const t = setTimeout(() => setShown(true), 400)
     return () => clearTimeout(t)
-  }, [ending])
+  }, [ending, complete])
   const { button, ready, isReady } = useReadyButton(shown)
 
   useEffect(() => {
@@ -214,6 +212,11 @@ export function EndScreen() {
   if (!shown) return null
   const keepExploring = () => {
     if (isReady()) useGame.getState().dismissEnd()
+  }
+  // Reloads the site, so the game starts over from the very beginning.
+  const playAgain = () => {
+    window.location.hash = '#/'
+    window.location.reload()
   }
   return (
     <div className="screen-backdrop screen-end" data-testid="end-screen">
@@ -229,32 +232,46 @@ export function EndScreen() {
           </strong>{' '}
           bugs caught · <strong>100%</strong> coverage · done in <strong>{formatTime(time)}</strong>
         </p>
-        <p className="screen-text">
-          Zero open bugs, build is green. This QA engineer is ready to ship to your team.
-          {hasGlass
-            ? ` Bonus: ${found} / ${HIDDEN_BUGS.length} hidden bugs found.`
-            : ' Psst: a magnifying glass by the start reveals hidden bugs.'}
-        </p>
+        {complete ? (
+          <p className="screen-text">
+            You caught every bug <strong>and</strong> found all {HIDDEN_BUGS.length} hidden ones. Nothing left to test:
+            this QA engineer is ready to ship to your team. Thanks for playing!
+          </p>
+        ) : (
+          <p className="screen-text">
+            Zero open bugs, build is green. This QA engineer is ready to ship to your team.
+            {hasGlass
+              ? ` Bonus: ${found} / ${HIDDEN_BUGS.length} hidden bugs found. Keep exploring to find the rest.`
+              : ' Psst: a magnifying glass by the start reveals hidden bugs.'}
+          </p>
+        )}
         <h2 className="end-contact-title">Let's talk</h2>
         <ContactList className="board-contact" />
-        <div className="screen-actions end-actions">
-          <a className="btn btn-primary" href={cvPdfUrl} download>
+        <div className={complete ? 'screen-actions end-actions end-actions-3' : 'screen-actions end-actions'}>
+          <a className={complete ? 'btn btn-ghost' : 'btn btn-primary'} href={cvPdfUrl} download>
             Download CV
           </a>
           <a className="btn btn-ghost" href="#/cv">
             View CV
           </a>
+          {complete ? null : (
+            <button
+              ref={button}
+              className="btn btn-ghost"
+              onClick={keepExploring}
+              aria-disabled={!ready}
+              data-testid="keep-exploring"
+            >
+              Keep exploring
+            </button>
+          )}
           <button
-            ref={button}
-            className="btn btn-ghost"
-            onClick={keepExploring}
-            aria-disabled={!ready}
-            data-testid="keep-exploring"
+            ref={complete ? button : undefined}
+            className={complete ? 'btn btn-primary' : 'btn btn-ghost'}
+            onClick={playAgain}
+            data-testid="play-again"
           >
-            Keep exploring
-          </button>
-          <button className="btn btn-ghost" onClick={() => window.location.reload()} data-testid="play-again">
-            Play again
+            {complete ? 'Play again ↻' : 'Play again'}
           </button>
         </div>
       </section>

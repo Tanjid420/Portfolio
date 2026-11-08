@@ -3,6 +3,7 @@ import { TopBar } from './components/TopBar'
 import { CvPage } from './components/CvPage'
 import { GameErrorBoundary, GameFallback } from './components/GameFallback'
 import { GameLoading } from './components/GameLoading'
+import { HowToPlayPanel } from './components/HowToPlay'
 import { hasWebGL } from './game/device'
 import { useRoute } from './useRoute'
 
@@ -25,6 +26,7 @@ export default function App() {
             <Suspense fallback={<GameLoading />}>
               <Game />
             </Suspense>
+            <HowToPlayPanel />
           </div>
         </GameErrorBoundary>
       )}

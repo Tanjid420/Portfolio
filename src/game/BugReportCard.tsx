@@ -97,9 +97,14 @@ export function BugReportCard() {
         </dl>
 
         <footer className="report-foot">
-          <span className="muted">
-            Coverage {caught} / {BUGS.length}
-          </span>
+          {/* Hidden bugs don't count toward coverage, so their cards leave it out. */}
+          {report.kind === 'hidden' ? (
+            <span />
+          ) : (
+            <span className="muted">
+              Coverage {caught} / {BUGS.length}
+            </span>
+          )}
           <button
             ref={button}
             className="btn btn-primary"

@@ -1,5 +1,7 @@
 import { create } from 'zustand'
+import { useHelp } from '../helpState'
 import { BUGS } from './bugs'
+import { HIDDEN_BUGS } from './hidden'
 import { ZONES } from './world'
 
 const [startX, startZ] = ZONES[0].position
@@ -95,11 +97,18 @@ export const useGame = create<GameState>((set) => ({
 /** All main bugs are caught. */
 export const allCaught = (s: GameState) => s.caught.length >= BUGS.length
 
-/** The ending screen is up: everything caught, every card read, not closed yet. */
-export const showingEnd = (s: GameState) => allCaught(s) && s.cardQueue.length === 0 && !s.endDismissed
+/** Every main bug is caught and every hidden bug is found: the game is fully done. */
+export const allDone = (s: GameState) => allCaught(s) && s.found.length >= HIDDEN_BUGS.length
 
-/** The hero can't move or swing: before Start, or while a card, the board or the ending is open. */
-export const isPaused = (s: GameState) => !s.started || s.boardOpen || s.cardQueue.length > 0 || showingEnd(s)
+/**
+ * The ending screen is up: all main bugs caught and every card read. "Keep exploring" closes it,
+ * but it comes back for good once the last hidden bug is found too.
+ */
+export const showingEnd = (s: GameState) => allCaught(s) && s.cardQueue.length === 0 && (!s.endDismissed || allDone(s))
+
+/** The hero can't move or swing: before Start, or while a card, the board, the help or the ending is open. */
+export const isPaused = (s: GameState) =>
+  !s.started || s.boardOpen || s.cardQueue.length > 0 || showingEnd(s) || useHelp.getState().open
 
 // Lets local checks and tests read the game state from the browser console.
 if (import.meta.env.DEV) (window as unknown as { __game: typeof useGame }).__game = useGame
