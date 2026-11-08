@@ -75,7 +75,7 @@ Object.keys(window.__bugs)                       // all bug IDs: BUG-001 to BUG-
 
 ## Ideas for more tests
 
-- Pick up the magnifying glass and find the three hidden bugs.
+- Pick up the magnifying glass and find the eight hidden bugs.
 - Walk to the notice board and press E.
 - Keyboard-only play: can you reach and close everything without a mouse?
 - An accessibility scan with `@axe-core/playwright`.
